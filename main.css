@@ -1,0 +1,75 @@
+html, body
+{
+    width: 100%;
+    height: 100%;
+}
+
+#cb_cf_serial_monitor
+{
+    margin: 0 auto;
+    margin-top:20px;
+    width: 600px;
+    height: 350px;
+    overflow: hidden;
+}
+
+#myChart
+{
+    width: 600px;
+    height: 350px;
+    display: block;
+    margin: 0 auto;
+    text-align: center;
+}
+
+#history-back-label,
+#keep-history-label
+{
+    margin-top: 10px;
+}
+
+#history-back-label:hover,
+#keep-history-label:hover
+{
+    cursor: pointer;    
+}
+
+#history-back
+{
+    width: 50px;
+}
+
+#serial_monitor_content
+{
+    height: 100%;
+}
+
+#serial_monitor_content > .input-append
+{
+    margin-top: -50px;
+    height: 40px;
+}
+
+#text2send
+{
+    margin-top: -150px;
+    margin-left: -65px;
+}
+
+#serial_send
+{
+    margin-top: -50px;
+    margin-left: 120px;
+}
+
+#serial_monitor_hud_and_autoscroll
+{
+    height: calc(100% - 40px);
+}
+
+#serial_hud
+{
+    overflow-y: scroll;
+    height: 100%;
+    margin-top: -60px;
+}

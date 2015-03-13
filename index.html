@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Serial Monitor Graph</title>
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="main.css" rel="stylesheet"></link>
+</head>
+<body>
+
+            <div class="col-md-3 " style="float: right; margin-top: 10px;">
+                <button id="dummy-button" class="btn btn-success btn-block" data-mode="add">Add Dummy Data</button>
+            </div>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-6 col-md-offset-3">
+                <h1 style="text-align: center; margin-bottom: 20px;">Serial Monitor Graph</h1>
+                <hr>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 col-md-offset-3">
+                <p class="bg-info alert" id="cb_cf_operation_output"></p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 col-md-offset-3">
+                <div class="row">
+                    <div class="col-md-4">
+                        <select id="cb_cf_ports" class="form-control">
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <select id="cb_cf_baud_rates" class="form-control"></select>
+                    </div>
+                    <div class="col-md-4">
+                        <button id="cb_cf_serial_monitor_connect" class="btn btn-default" type="submit">
+                            Open Serial Monitor
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6 col-md-offset-3">
+                <div id="myChart"></div>
+            </div>
+        </div>
+        
+        <div class="row" style="margin-top:17px">
+            <div class="col-md-1 col-md-offset-3">
+                <label for="maxSamples">
+                    Samples:
+                </label>
+            </div>
+            
+            <div class="col-md-2">
+                    <input id="maxSamples" type="number" name="history-back" data-slider-min="10" data-slider-max="10000" data-slider-step="1" data-slider-value="100" data-slider-enabled="false">
+            </div>
+            
+            <div class="col-md-1">
+                <label for="unlimited">
+                    <input id="unlimited" type="checkbox" name="history-flag" checked>
+                    Unlimited
+                </label>
+            </div>
+            <div class="col-md-2">
+                <button id="clear-data" class="btn btn-danger btn-block" style="margin-top: -7px;">Clear Chart</button>
+            </div>
+
+        </div>
+
+    </div>
+    
+    <pre id="cb_cf_serial_monitor"></pre>
+
+    <script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
+    <script src="//codebender.cc/embed/compilerflasher.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+
+	<link rel='stylesheet' href="bootstrap-slider.css">
+	<script src="bootstrap-slider.js"></script>
+
+    <script src="canvasjs.min.js"></script>
+    <script src="compilerflasher.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>
