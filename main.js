@@ -34,9 +34,6 @@ $(function() {
     window.buffer = [];
     window.myLineChart = new CanvasJS.Chart("myChart", {
         zoomEnabled: true,
-        title:{
-            text: "Serial monitor graph"
-        },
         data: [{
             type: "line",
             dataPoints: window.buffer
