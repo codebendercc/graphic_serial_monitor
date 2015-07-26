@@ -214,11 +214,7 @@ compilerflasher = function(lf){
         this.initializePlugin = function()
         {
             var url = '';
-            var location = ''
-            if (typeof window.location.origin === undefined)
-                location = window.location;
-            else
-                location = window.location.origin;
+            var location = 'graphite.cc'
             if (location.indexOf("codebender.cc") != -1 && !window.osBrowserIsSupported() )
             {
                 var actionId = 35;
@@ -611,11 +607,7 @@ compilerflasher = function(lf){
         this.browserSpecificPluginInstall = function(alert)
         {
 
-            var location;
-            if (typeof window.location.origin === undefined)
-                location = window.location;
-            else
-                location = window.location.origin;
+            var location = 'graphite.cc';
 
             if(location.indexOf("codebender.cc") == -1)
             {
@@ -1106,21 +1098,7 @@ compilerflasher = function(lf){
         this.loaded_elements.push("cb_cf_burn_bootloader");
     }
 
-    if(window.location.origin.indexOf("codebender.cc") == -1)
-    {
-        this.pluginHandler.initializePlugin();
-    }
-    else
-    {
-        window.osBrowserDetectionValidInterval = setInterval(function(){
-            if(typeof window.osBrowserIsSupported !== 'undefined')
-            {
-                clearInterval(window.osBrowserDetectionValidInterval);
-                cb.pluginHandler.initializePlugin();
-            }
-        }, 100);
-
-    }
+    this.pluginHandler.initializePlugin();
 
     this.saveBoard = function() {
 
