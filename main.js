@@ -9,24 +9,20 @@ function updateSlider()
 	}
 }
 
-$(document).ready(function()
-{
+$(function() {
     $("#maxSamples").slider({
-        	scale: 'logarithmic'
+        scale: 'logarithmic'
     });
     
     window.sliderValue = parseInt($("#maxSamples").attr("data-slider-value"), 10);
     $("#maxSamples").on("slide", function(slideEvt) {
-    	window.sliderValue = slideEvt.value;
+	    window.sliderValue = slideEvt.value;
     });
 
     
     $("#unlimited").click(updateSlider);
     updateSlider();
 
-});
-
-$(function() {
     // Initialize compilerflasher
     compilerflasher = new compilerflasher(function () {});
     
