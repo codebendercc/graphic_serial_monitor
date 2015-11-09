@@ -91,19 +91,6 @@ $(function() {
     $(document).on('serial_monitor_connect', function (event, data) {
         clearData();
     });
-
-    //$('#dummy-button').on('click', function () {
-    //    if ($(this).data('mode') == 'add')
-    //    {
-    //        dummyData();
-    //        $(this).text('Stop dummy data').data('mode', 'remove');
-    //    }
-    //    else
-    //    {
-    //        clearInterval(window.dummyInterval);
-    //        $(this).text('Add dummy data').data('mode', 'add');
-    //    }
-    //});
     
     $('#clear-data').on('click', function () {
         clearData();
@@ -154,27 +141,11 @@ $(function() {
         window.myLineChart.render();
     }
     
-    //function dummyData()
-    //{
-    //    window.counter = 0;
-    //    window.dummyInterval = setInterval(function () {
-    //    var point = (Math.exp(Math.sin((new Date).getTime() / 2000.0 * Math.PI)) - 0.36787944) * 108.0;
-    //
-    //    addElement({x:xVal++, y: point});
-    //    window.myLineChart.render();
-    //
-    //    }, 40);
-    //}
-    
     
     function addElement(element)
     {
-        console.log(element);
-        console.log(sensorHash[element.type]);
         if(sensorHash[element.type])
         {
-            console.log(sensorHash[element.type]);
-            console.log(window[sensorHash[element.type].added]);
             if(typeof sensorHash[element.type].added != 'undefined' && !sensorHash[element.type].added)
             {
                 var newObject;
@@ -201,9 +172,7 @@ $(function() {
                 }
 
 
-                console.log(window.myLineChart.options);
                 window.myLineChart.options.data.push(newObject);
-                console.log(window.myLineChart.options);
 
                 sensorHash[element.type].added = true;
             }
