@@ -120,14 +120,10 @@ $(function() {
 
         for (i=0; i<lines.length; i++)
         {
-            if (!re_firstLine.test(lines[i]))
+            if (!re_firstLine.test(lines[i]) && !isNaN(parseFloat(lines[i])))
             {
-                if(!isNaN(parseFloat(lines[i])))
-                {
-                    var NewObject = {type: lines[i].match(/[a-z]/i) ? lines[i].match(/[a-z]/i)[0] : null, value: parseFloat(lines[i], 10)};
-                    data.push(NewObject);
-                    console.log(NewObject);
-                }
+                var NewObject = {type: lines[i].match(/[a-z]/i) ? lines[i].match(/[a-z]/i)[0] : null, value: parseFloat(lines[i], 10)};
+                data.push(NewObject);
             }
         }
         return data;
