@@ -114,8 +114,6 @@ $(function() {
         snapshot.forEach(function(value){
             console.log(value);
             addElement({x: new Date(), y: value.value, type: value.type});
-            //addElement({x:xVal++, y: value.value, type: value.type});
-
         });
         window.myLineChart.render();
 
@@ -204,12 +202,7 @@ $(function() {
 
                 sensorHash[element.type].added = true;
             }
-
             window[sensorHash[element.type].arrayName].push(element);
-        }
-        else
-        {
-
         }
 
         if(!$("#unlimited")[0].checked)
