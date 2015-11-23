@@ -25,6 +25,7 @@ $(function() {
     window.tempFahrenheit = [];
     window.atmPressure = [];
 
+    var sensorArray = [window.tempCelcius, window.tempFahrenheit, window.atmPressure];
     var sensorHash =
     {
         C: {
@@ -91,19 +92,6 @@ $(function() {
     $(document).on('serial_monitor_connect', function (event, data) {
         clearData();
     });
-
-    //$('#dummy-button').on('click', function () {
-    //    if ($(this).data('mode') == 'add')
-    //    {
-    //        dummyData();
-    //        $(this).text('Stop dummy data').data('mode', 'remove');
-    //    }
-    //    else
-    //    {
-    //        clearInterval(window.dummyInterval);
-    //        $(this).text('Add dummy data').data('mode', 'add');
-    //    }
-    //});
     
     $('#clear-data').on('click', function () {
         clearData();
@@ -117,30 +105,25 @@ $(function() {
         }
 
         var lines;
+
+        var splitChar = '\n';
         if(msg.indexOf(',') > -1)
         {
-            lines = msg.split(',');
-            lines = lines.filter(Boolean);
+            splitChar = ',';
         }
-        else
-        {
-            lines = msg.trim().split('\n');
-        }
+        lines = msg.trim().split(splitChar);
 
-        var re_firstLine = /^connecting at .+$/;
+
+        var firstLine = /^connecting at .+$/;
         var data = [];
         var i;
 
         for (i=0; i<lines.length; i++)
         {
-            if (!re_firstLine.test(lines[i]))
+            if (!firstLine.test(lines[i]) && !isNaN(parseFloat(lines[i])))
             {
-                if(!isNaN(parseFloat(lines[i])))
-                {
-                    var NewObject = {type: lines[i].match(/[a-z]/i) ? lines[i].match(/[a-z]/i)[0] : null, value: parseFloat(lines[i], 10)};
-                    data.push(NewObject);
-                    console.log(NewObject);
-                }
+                var NewObject = {type: lines[i].match(/[a-z]/i) ? lines[i].match(/[a-z]/i)[0] : null, value: parseFloat(lines[i], 10)};
+                data.push(NewObject);
             }
         }
         return data;
@@ -148,33 +131,17 @@ $(function() {
 
     function clearData()
     {
-        window.buffer.length = 0;
-        window.tempCelcius.length = 0;
-        window.tempFahrenheit.length = 0;
+        sensorArray.forEach(function(val, index){
+            val.length = 0;
+        });
         window.myLineChart.render();
     }
-    
-    //function dummyData()
-    //{
-    //    window.counter = 0;
-    //    window.dummyInterval = setInterval(function () {
-    //    var point = (Math.exp(Math.sin((new Date).getTime() / 2000.0 * Math.PI)) - 0.36787944) * 108.0;
-    //
-    //    addElement({x:xVal++, y: point});
-    //    window.myLineChart.render();
-    //
-    //    }, 40);
-    //}
     
     
     function addElement(element)
     {
-        console.log(element);
-        console.log(sensorHash[element.type]);
         if(sensorHash[element.type])
         {
-            console.log(sensorHash[element.type]);
-            console.log(window[sensorHash[element.type].added]);
             if(typeof sensorHash[element.type].added != 'undefined' && !sensorHash[element.type].added)
             {
                 var newObject;
@@ -201,9 +168,7 @@ $(function() {
                 }
 
 
-                console.log(window.myLineChart.options);
                 window.myLineChart.options.data.push(newObject);
-                console.log(window.myLineChart.options);
 
                 sensorHash[element.type].added = true;
             }
