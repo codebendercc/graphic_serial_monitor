@@ -27,6 +27,8 @@ $(function() {
     window.moisture = [];
     window.alcohol = [];
 
+    var sensorArray = [window.tempCelcius, window.tempFahrenheit, window.atmPressure, window.moisture, window.alcohol];
+
     var sensorHash =
     {
         C: {
@@ -53,6 +55,9 @@ $(function() {
             title: 'Alcohol Concentration',
             arrayName: 'alcohol',
             added: false
+        }
+        D: {
+            title: 'Decible'
         }
     };
     
