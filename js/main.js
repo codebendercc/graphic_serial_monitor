@@ -24,6 +24,8 @@ $(function() {
     window.tempCelcius = [];
     window.tempFahrenheit = [];
     window.atmPressure = [];
+    window.moisture = [];
+    window.alcohol = [];
 
     var sensorHash =
     {
@@ -40,6 +42,16 @@ $(function() {
         p: {
             title: 'Atmospheric Pressure',
             arrayName: 'atmPressure',
+            added: false
+        },
+        m: {
+            title: 'Moisture',
+            arrayName: 'moisture',
+            added: false
+        },
+        a: {
+            title: 'Alcohol Concentration',
+            arrayName: 'alcohol',
             added: false
         }
     };
