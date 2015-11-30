@@ -29,6 +29,7 @@ $(function() {
 
     var sensorArray = [window.tempCelcius, window.tempFahrenheit, window.atmPressure, window.moisture, window.alcohol];
 
+    var sensorArray = [window.tempCelcius, window.tempFahrenheit, window.atmPressure];
     var sensorHash =
     {
         C: {
@@ -121,23 +122,22 @@ $(function() {
         }
 
         var lines;
+
+        var splitChar = '\n';
         if(msg.indexOf(',') > -1)
         {
-            lines = msg.split(',');
-            lines = lines.filter(Boolean);
+            splitChar = ',';
         }
-        else
-        {
-            lines = msg.trim().split('\n');
-        }
+        lines = msg.trim().split(splitChar);
 
-        var re_firstLine = /^connecting at .+$/;
+
+        var firstLine = /^connecting at .+$/;
         var data = [];
         var i;
 
         for (i=0; i<lines.length; i++)
         {
-            if (!re_firstLine.test(lines[i]) && !isNaN(parseFloat(lines[i])))
+            if (!firstLine.test(lines[i]) && !isNaN(parseFloat(lines[i])))
             {
                 var NewObject = {type: lines[i].match(/[a-z]/i) ? lines[i].match(/[a-z]/i)[0] : null, value: parseFloat(lines[i], 10)};
                 data.push(NewObject);
@@ -148,9 +148,9 @@ $(function() {
 
     function clearData()
     {
-        window.buffer.length = 0;
-        window.tempCelcius.length = 0;
-        window.tempFahrenheit.length = 0;
+        sensorArray.forEach(function(val, index){
+            val.length = 0;
+        });
         window.myLineChart.render();
     }
     
