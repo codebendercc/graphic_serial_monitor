@@ -138,14 +138,8 @@ $(function() {
     $(document).on('serial_monitor_connect', function (event, data) {
         clearData();
     });
-<<<<<<< HEAD
-    
-=======
-
 
     // When button to clear data is clicked, clear previous data from chart
-
->>>>>>> Added comments for functions and confusing if statements in main.js
     $('#clear-data').on('click', function () {
         clearData();
     });
@@ -165,25 +159,16 @@ $(function() {
 
         var lines;
 
-<<<<<<< HEAD
-        var splitChar = '\n';
-=======
         //If a particular line has a comma, split into array based on it,
         // otherwise split based on new line character
-
->>>>>>> Added comments for functions and confusing if statements in main.js
+        var splitChar = '\n';
         if(msg.indexOf(',') > -1)
         {
             splitChar = ',';
         }
         lines = msg.trim().split(splitChar);
 
-
-<<<<<<< HEAD
         var firstLine = /^connecting at .+$/;
-=======
-        var re_firstLine = /^connecting at .+$/;
->>>>>>> Added comments for functions and confusing if statements in main.js
         var data = [];
         var i;
 
@@ -191,16 +176,11 @@ $(function() {
         {
             if (!firstLine.test(lines[i]) && !isNaN(parseFloat(lines[i])))
             {
-<<<<<<< HEAD
-                var NewObject = {type: lines[i].match(/[a-z]/i) ? lines[i].match(/[a-z]/i)[0] : null, value: parseFloat(lines[i], 10)};
-                data.push(NewObject);
-=======
                 if(!isNaN(parseFloat(lines[i])))
                 {
                     var NewObject = {type: lines[i].match(/[a-z]/i) ? lines[i].match(/[a-z]/i)[0] : null, value: parseFloat(lines[i], 10)};
                     data.push(NewObject);
                 }
->>>>>>> Added comments for functions and confusing if statements in main.js
             }
         }
         return data;
@@ -216,27 +196,17 @@ $(function() {
         });
         window.myLineChart.render();
     }
-<<<<<<< HEAD
-    
-    
-=======
-
 
     /**
      * Identifies the type of data and adds it to the correct sensor array. Which plots it on the chart
      * @param element - Data to add to chart
      */
->>>>>>> Added comments for functions and confusing if statements in main.js
     function addElement(element)
     {
         //If type of element is recognized as a known sensor
         if(sensorHash[element.type])
         {
-<<<<<<< HEAD
-=======
-
             // If this is the first data of this sensor
->>>>>>> Added comments for functions and confusing if statements in main.js
             if(typeof sensorHash[element.type].added != 'undefined' && !sensorHash[element.type].added)
             {
                 var newObject;
@@ -268,11 +238,8 @@ $(function() {
 
                 sensorHash[element.type].added = true;
             }
-<<<<<<< HEAD
-=======
 
             // If this isnt the first element, then add it to the existing array
->>>>>>> Added comments for functions and confusing if statements in main.js
             window[sensorHash[element.type].arrayName].push(element);
         }
 
