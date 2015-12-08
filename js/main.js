@@ -24,8 +24,15 @@ $(function() {
     window.tempCelcius = [];
     window.tempFahrenheit = [];
     window.atmPressure = [];
+    window.moisture = [];
+    window.alcohol = [];
+    window.decibel = [];
+    window.light = [];
+    window.magnetic = [];
 
-    var sensorArray = [window.tempCelcius, window.tempFahrenheit, window.atmPressure];
+    var sensorArray = [window.tempCelcius, window.tempFahrenheit, window.atmPressure, window.moisture, window.alcohol,
+                       window.decibel, window.light, window.magnetic];
+
     var sensorHash =
     {
         C: {
@@ -41,6 +48,31 @@ $(function() {
         p: {
             title: 'Atmospheric Pressure',
             arrayName: 'atmPressure',
+            added: false
+        },
+        m: {
+            title: 'Moisture',
+            arrayName: 'moisture',
+            added: false
+        },
+        a: {
+            title: 'Alcohol Concentration',
+            arrayName: 'alcohol',
+            added: false
+        },
+        D: {
+            title: 'Decibel Level',
+            arrayName: 'decibel',
+            added: false
+        },
+        L: {
+            title: 'Light Intensity',
+            arrayName: 'light',
+            added: false
+        },
+        T: {
+            title: 'Tesla',
+            arrayName: 'magnetic',
             added: false
         }
     };
