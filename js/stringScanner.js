@@ -72,16 +72,13 @@ StringScanner.prototype.nextFloat = function() {
     }
     if (this.reachedEnd() || !is_decimal_point(this.data.charAt(this.cur)) || this.isDelimiter(this.current())) {
         return integerPart;
-    } else {
-
-        if (!is_numeric(this.data.charAt(this.cur + 1))) {
-            return integerPart;
-        }
-        this.cur++;
-        var decimalPart = this.nextInt();
-        return parseFloat(integerPart + '.' + decimalPart);
     }
-
+    if (!is_numeric(this.data.charAt(this.cur + 1))) {
+        return integerPart;
+    }
+    this.cur++;
+    var decimalPart = this.nextInt();
+    return parseFloat(integerPart + '.' + decimalPart);
 }
 
 /*
@@ -127,14 +124,14 @@ StringScanner.prototype.nextChar = function() {
 
 StringScanner.prototype.next = function() {
     //move to the next non-delimiter character
-    while (this.isDelimiter(this.data.charAt(this.cur)) && !this.reachedEnd()) {
+    while (this.isDelimiter(this.current()) && !this.reachedEnd()) {
         this.cur++;
     }
     if (this.reachedEnd()) {
         return null;
     }
     var start = this.cur;
-    while (!this.isDelimiter(this.data.charAt(this.cur)) && !this.reachedEnd()) {
+    while (!this.isDelimiter(this.current()) && !this.reachedEnd()) {
         this.cur++;
     }
     return this.data.substring(start, this.cur);
@@ -145,6 +142,7 @@ StringScanner.prototype.current = function() {
 }
 
 StringScanner.prototype.previous = function() {
+    if (this.cur == 0) return null;
     return this.data.charAt(this.cur - 1);
 }
 

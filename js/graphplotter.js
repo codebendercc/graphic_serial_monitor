@@ -10,9 +10,6 @@ GraphiteGraphPlotter = function(div) {
 }
 
 GraphiteGraphPlotter.prototype.updateChart = function(datalist) {
-
-    console.log(datalist)
-    console.log(this.dataNumber)
     for (var i = 0; i < datalist.length; i++) {
         if (datalist[i].length != this.dataNumber) continue;
         for (var j = 0; j < this.dps.length; j++) {
@@ -26,7 +23,6 @@ GraphiteGraphPlotter.prototype.updateChart = function(datalist) {
         }
         this.xVal++;
     };
-
     this.chart.render();
 };
 

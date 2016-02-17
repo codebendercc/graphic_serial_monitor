@@ -33,15 +33,12 @@ describe("StringScanner", function() {
         expect(scanner.nextFloat()).toEqual(1.2);
         console.log(scanner.cur);
         expect(scanner.nextFloat()).toEqual(null);
-        //expect(scanner.current()).toEqual("\n");
         expect(scanner.nextFloat()).toEqual(2.2);
     })
 
     it("should stop at first character if it's delimeter", function() {
         scanner = new StringScanner("\n1.2");
         expect(scanner.nextFloat()).toEqual(null);
-        console.log(scanner.cur);
-        //expect(scanner.current()).toEqual("\n");
         expect(scanner.nextFloat()).toEqual(1.2);
     })
 
@@ -49,8 +46,35 @@ describe("StringScanner", function() {
         scanner = new StringScanner("1.2 \n");
         expect(scanner.nextFloat()).toEqual(1.2);
         expect(scanner.nextFloat()).toEqual(null);
-        expect(scanner.data.charAt(scanner.cur-1)).toEqual("\n");
+        expect(scanner.data.charAt(scanner.cur - 1)).toEqual("\n");
+    })
+    
+    it("reset cursor works properly", function() {
+        scanner = new StringScanner("1a2b3c4d5");
+        expect(scanner.nextFloat()).toEqual(1);
+        scanner.resetCursor();
+        expect(scanner.nextFloat()).toEqual(1);
     })
 
+    it("#nextChar", function() {
+        scanner = new StringScanner("1a");
+        expect(scanner.nextFloat()).toEqual(1);
+        expect(scanner.nextChar()).toEqual("a");
+        expect(scanner.nextChar()).toEqual(null);
+    })
 
+    it("#next", function() {
+        scanner = new StringScanner("1 this thing\n");
+        expect(scanner.nextFloat()).toEqual(1);
+        expect(scanner.next()).toEqual(" this thing");
+        expect(scanner.next()).toEqual(null);
+    })
+
+    it("#previous", function() {
+        scanner = new StringScanner("112s123\n");
+        expect(scanner.previous()).toEqual(null);
+        expect(scanner.nextFloat()).toEqual(112);
+        expect(scanner.nextChar()).toEqual("s");
+        expect(scanner.previous()).toEqual("s");
+    })
 });

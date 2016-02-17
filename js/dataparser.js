@@ -5,39 +5,39 @@ GraphiteDataParser = function() {
     ////////////////////
     //INSTANCE VARIABLE/
     ////////////////////
-    /*VARIABLE NAME: dataStorage
+    /*
       PURPOSE      : store all processed data
       FORMAT       : 2D-array of integers 
                      [[set of simultanous data],[..],[..]...]
     */
     this.dataStorage = [];
-    /*VARIABLE NAME: dataFormat
+    /*
       PURPOSE      : format of data 
       FORMAT       : integer
-      COMMENT      : please use the constants provided instead of integer
+      COMMENT      : please use the constants provided instead of integers
     */
     this.dataFormat = GraphiteDataParser.ONE_LINER_TYPE;
-    /*VARIABLE NAME: currentDisplayedIndex
+    /*
       PURPOSE      : the index of the last number 'displayed' using method showNewData()
       FORMAT       : integer
     */
     this.currentDisplayedIndex = 0;
-    /*VARIABLE NAME: pendingData
+    /*
       PURPOSE      : 1-D array of values scraped from raw data that is not ready to put into storage
       FORMAT       : integer array
     */
     this.pendingData = [];
-    /*VARIABLE NAME: dataNumber
+    /*
       PURPOSE      : number of data types/ number of lines on the linear graph 
       FORMAT       : integer
     */
     this.dataNumber = 1;
-    /*VARIABLE NAME: withXCord
+    /*
       PURPOSE      : if there are more the one data type, this indicates whether the first of the data is used as the x-coordinate
       FORMAT       : boolean
     */
     this.withXCord = true;
-    /*VARIABLE NAME: incompleteNumberSegment
+    /*
       PURPOSE      : if there is a (possibly) incomplete data segement from the previous raw data stream, it will be stored here, 
                      for example: "xxxxxx 1.2" or "xxxxx 1."
       FORMAT       : String
@@ -74,7 +74,6 @@ GraphiteDataParser = function() {
     }
 
     this.processMultilineFormat = function(rawData) {
-
         if (this.incompleteNumberSegment != null) { //theres incomplete segment from previous data stream
             rawData = this.incompleteNumberSegment + rawData;
             this.incompleteNumberSegment = null;
@@ -166,7 +165,6 @@ temperature: 4 pressure: 43
 
 
 GraphiteDataParser.prototype.addRawData = function(rawData) {
-    console.log(rawData);
     switch (this.dataFormat) {
         case GraphiteDataParser.ONE_LINER_TYPE:
             this.processOneLinerFormat(rawData);
