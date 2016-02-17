@@ -1,68 +1,46 @@
-/*
-parse raw string data and store it into processable nested arrays
-*/
+/** parse raw string data and store it into processable nested arrays */
 GraphiteDataParser = function() {
-    ////////////////////
-    //INSTANCE VARIABLE/
-    ////////////////////
-    /*
-      PURPOSE      : store all processed data
-      FORMAT       : 2D-array of integers 
-                     [[set of simultanous data],[..],[..]...]
-    */
+    //store all processed data
+    //2D-array of integers - [[set of simultanous data],[..],[..]...]
     this.dataStorage = [];
-    /*
-      PURPOSE      : format of data 
-      FORMAT       : integer
-      COMMENT      : please use the constants provided instead of integers
-    */
+    //format of data 
+    //please use the constants provided instead of integers
     this.dataFormat = GraphiteDataParser.ONE_LINER_TYPE;
-    /*
-      PURPOSE      : the index of the last number 'displayed' using method showNewData()
-      FORMAT       : integer
-    */
+    //the index of the last number 'displayed' using method showNewData()
     this.currentDisplayedIndex = 0;
-    /*
-      PURPOSE      : 1-D array of values scraped from raw data that is not ready to put into storage
-      FORMAT       : integer array
-    */
+    //1-D integer array of values scraped from raw data that is not ready to put into storage
     this.pendingData = [];
-    /*
-      PURPOSE      : number of data types/ number of lines on the linear graph 
-      FORMAT       : integer
-    */
+    //number of data types,which determines number of lines on the linear graph 
     this.dataNumber = 1;
-    /*
-      PURPOSE      : if there are more the one data type, this indicates whether the first of the data is used as the x-coordinate
-      FORMAT       : boolean
-    */
+    //indicates whether the first of the data is used as the x-coordinate
     this.withXCord = true;
-    /*
-      PURPOSE      : if there is a (possibly) incomplete data segement from the previous raw data stream, it will be stored here, 
-                     for example: "xxxxxx 1.2" or "xxxxx 1."
-      FORMAT       : String
-    */
+    //store incomplete data segement from the previous raw data stream
+    //for example: "xxxxxx 1.2" or "xxxxx 1."
     this.incompleteNumberSegment = null;
 
     /////////////////////
     //PROTECTED METHODS//
     /////////////////////
-
+    /**
+     * assume the string follows one-liner format and process
+     * @params {string} rawData - raw string data
+     */
     this.processOneLinerFormat = function(rawData) {
         if (this.incompleteNumberSegment != null) {
             rawData = this.incompleteNumberSegment + rawData;
             this.incompleteNumberSegment = null;
         }
-        if (rawData.indexOf("\n") > -1) { //if the raw data consists of more than one line, it's not one-liner format
+        //if the raw data consists of more than one line, it's not one-liner format
+        if (rawData.indexOf("\n") > -1) {
             this.dataFormat = GraphiteDataParser.MULTI_LINE_TYPE;
             this.currentDisplayedIndex = 0;
-            this.pendingData = flatten(this.dataStorage); //put all the current data as pending, (processed as the single-data-type format)
+            //put all the current data as pending, (processed as the single-data-type format)
+            this.pendingData = flatten(this.dataStorage);
             this.dataStorage = [];
             this.processMultilineFormat(rawData);
             return;
         }
-
-        scanner = new StringScanner(rawData);
+        var scanner = new StringScanner(rawData);
         var value;
         while (value = scanner.nextFloat()) {
             if (this.checkAndProcessIncompleteSegment(scanner, value)) {
@@ -73,6 +51,10 @@ GraphiteDataParser = function() {
         this.checkNegativeSignEnding(scanner);
     }
 
+    /**
+     * assume the string follows multiline format and process
+     * @params {string} rawData - raw string data
+     */
     this.processMultilineFormat = function(rawData) {
         if (this.incompleteNumberSegment != null) { //theres incomplete segment from previous data stream
             rawData = this.incompleteNumberSegment + rawData;
@@ -100,16 +82,21 @@ GraphiteDataParser = function() {
         this.checkNegativeSignEnding(scanner);
     }
 
-    this.checkNegativeSignEnding = function(scanner){
-    	if (scanner.last() == '-'){
-    		this.incompleteNumberSegment = '-';
-    	}
+    /**
+     * check whether the current data ends with a negative sign
+     * @return {boolean}
+     */
+    this.checkNegativeSignEnding = function(scanner) {
+        if (scanner.last() == '-') {
+            this.incompleteNumberSegment = '-';
+        }
     }
 
-    //check whether the current data stream has reached end and it ends with (potentially) incomplete data
-    //if has incomplete data, put it in incompleteSegment and return true
-    //else return false
-
+    /**
+     * check whether the current data stream has reached end and it ends with (potentially) incomplete data
+       if has incomplete data, put it in incompleteSegment and return true
+     * @return {boolean}
+     */
     this.checkAndProcessIncompleteSegment = function(scanner, value) {
         if (scanner.reachedEnd()) {
             this.incompleteNumberSegment = value + '';
@@ -153,17 +140,12 @@ time: 3 temperature: 6 pressure: 23
 time: 4 temperature: 2 pressure: 23
 time: 5 temperature: 4 pressure: 43
 */
-GraphiteDataParser.MULTI_DATA_WITH_X = 2;
-/*MULTI_DATA_WITH_X example:
-temperature: 2 pressure: 31
-temperature: 5 pressure: 11
-temperature: 6 pressure: 23
-temperature: 2 pressure: 23
-temperature: 4 pressure: 43
+
+GraphiteDataParser.MULTI_DATA_WITH_X = 2; //not yet implemented
+
+/**
+* add new raw string into the parser
 */
-
-
-
 GraphiteDataParser.prototype.addRawData = function(rawData) {
     switch (this.dataFormat) {
         case GraphiteDataParser.ONE_LINER_TYPE:
@@ -176,30 +158,42 @@ GraphiteDataParser.prototype.addRawData = function(rawData) {
             this.processMultiDataWithXFormat(rawData);
             break;
         default:
-            throw "how did even reach here"
+            throw "how did you even reach here"
     }
 
 }
-//return a list of data, starting from the currentDisplayedIndex to end
+
+/**
+* get a list of data that has not been read
+* @return {array<array<integer>>}
+*/
 GraphiteDataParser.prototype.showNewData = function() {
     tempList = this.dataStorage.slice(this.currentDisplayedIndex);
     this.currentDisplayedIndex = this.dataStorage.length;
     return tempList;
 }
 
+/**
+* get all data that is stored in the parser in a nested array
+* @return {array<array<number>>}
+*/
 GraphiteDataParser.prototype.showAllData = function() {
     return this.dataStorage;
 }
 
+/**
+* get number of data types,which determines number of lines on the linear graph 
+* @return {number}
+*/
 GraphiteDataParser.prototype.getdataNumber = function() {
     return this.dataNumber || 1;
 }
 
-function contains_number(line) {
-    scanner = new StringScanner(line);
-    return !(scanner.nextFloat() == null);
-}
-
+/**
+* 'unnest' a nested array
+* @param {array<array<number>>} 
+* @return {array<number>}
+*/
 function flatten(list) {
     return [].concat.apply([], list);
 }
