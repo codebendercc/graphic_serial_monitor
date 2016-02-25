@@ -3,18 +3,24 @@ GraphiteGraphPlotter = function(div) {
     this.chart;
     this.dps; //datapoints
     this.dataNumber;
-    this.hasXCordinate;
-    this.initGraph();
+    this.withXCord;
     this.xVal = 0;
     this.dataLength = 50;
+    this.initGraph();
 }
 
 GraphiteGraphPlotter.prototype.updateChart = function(datalist) {
     for (var i = 0; i < datalist.length; i++) {
         if (datalist[i].length != this.dataNumber) continue;
-        for (var j = 0; j < this.dps.length; j++) {
+        var dataStartPos = 0;
+        var xCordValue = this.xVal;
+        if (this.withXCord){
+            dataStartPos = 1;
+            xCordValue = datalist[i][0];
+        }
+        for (var j = dataStartPos; j < this.dps.length; j++) {
             this.dps[j].push({
-                x: this.xVal,
+                x: xCordValue,
                 y: datalist[i][j]
             });
             if (this.dps[j].length > this.dataLength) {
@@ -26,12 +32,17 @@ GraphiteGraphPlotter.prototype.updateChart = function(datalist) {
     this.chart.render();
 };
 
-GraphiteGraphPlotter.prototype.initGraph = function(dataNumber) {
+GraphiteGraphPlotter.prototype.initGraph = function(dataNumber, withXCord) {
     this.xVal = 0;
     this.dataNumber = dataNumber || 1;
-    this.dps = fillArray([], this.dataNumber);
+    this.withXcord = withXCord;
+    var yCordinateDataNumber = dataNumber;
+    if (withXCord) {
+        yCordinateDataNumber--;
+    }
+    this.dps = fillArray([], yCordinateDataNumber);
     var tempData = [];
-    for (var i = 0; i < this.dataNumber; i++) {
+    for (var i = 0; i < yCordinateDataNumber; i++) {
         tempData.push({
             type: "line",
             name: "data" + i,

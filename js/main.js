@@ -23,10 +23,10 @@ $(function() {
         if (firstLine.test(data)) return;
         parser.addRawData(data);
         if (withXCord == null) {
-            withXCord = parser.withXCord;
+            withXCord = parser.isWithXCord();
         }
-        if (chartPlotter.dataNumber != parser.getdataNumber()) {
-            chartPlotter.initGraph(parser.getdataNumber());
+        if ((chartPlotter.dataNumber != parser.getdataNumber()) || (withXCord != parser.isWithXCord())) {
+            chartPlotter.initGraph(parser.getdataNumber(),parser.isWithXCord());
         }
         chartPlotter.updateChart(parser.showNewData());
     });
