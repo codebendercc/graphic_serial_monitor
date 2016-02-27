@@ -17,15 +17,11 @@ $(function() {
     /**
      * Runs whenever new data is detected on serial monitor
      */
-    var withXCord;
     var firstLine = /^connecting at .+$/;
     $(document).on('serial_monitor_new_line', function(event, data) {
         if (firstLine.test(data)) return;
         parser.addRawData(data);
-        if (withXCord == null) {
-            withXCord = parser.isWithXCord();
-        }
-        if ((chartPlotter.dataNumber != parser.getdataNumber()) || (withXCord != parser.isWithXCord())) {
+        if ((chartPlotter.dataNumber != parser.getdataNumber()) || (chartPlotter.withXCord != parser.isWithXCord())) {
             chartPlotter.initGraph(parser.getdataNumber(),parser.isWithXCord());
         }
         chartPlotter.updateChart(parser.showNewData());

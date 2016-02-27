@@ -35,14 +35,14 @@ GraphiteGraphPlotter.prototype.updateChart = function(datalist) {
 GraphiteGraphPlotter.prototype.initGraph = function(dataNumber, withXCord) {
     this.xVal = 0;
     this.dataNumber = dataNumber || 1;
-    this.withXcord = withXCord;
-    var yCordinateDataNumber = dataNumber;
+    this.withXCord = (typeof withXCord !== 'undefined') ? withXCord : false;
+    var dataStartPos = 0;
     if (withXCord) {
-        yCordinateDataNumber--;
+        dataStartPos = 1;
     }
-    this.dps = fillArray([], yCordinateDataNumber);
+    this.dps = fillArray([], dataNumber);
     var tempData = [];
-    for (var i = 0; i < yCordinateDataNumber; i++) {
+    for (var i = dataStartPos; i < dataNumber; i++) {
         tempData.push({
             type: "line",
             name: "data" + i,
