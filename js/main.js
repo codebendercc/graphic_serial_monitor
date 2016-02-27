@@ -43,11 +43,6 @@ $(function() {
      * Clears all data from the sensors, refreshing the chart
      */
     function clearData() {
-        /*
-        sensorArray.forEach(function(val, index) {
-            val.length = 0;
-        });
-        window.myLineChart.render();*/
-        parser = new GraphiteGraphPlotter();
+        chartPlotter = new GraphiteGraphPlotter("chartContainer");
     }
 });
