@@ -6,7 +6,16 @@ GraphiteGraphPlotter = function(div) {
     this.withXCord;
     this.xVal = 0;
     this.dataLength = 50;
+    this.dataparser = new GraphiteDataParser();
     this.initGraph();
+}
+
+GraphiteGraphPlotter.prototype.addNewData = function(rawData) {
+    this.dataparser.addRawData(rawData);
+    if ((this.dataNumber != this.dataparser.getdataNumber()) || (this.withXCord != this.dataparser.isWithXCord())) {
+        this.initGraph(this.dataparser.getdataNumber(), this.dataparser.isWithXCord());
+    }
+    this.updateChart(this.dataparser.showNewData());
 }
 
 GraphiteGraphPlotter.prototype.updateChart = function(datalist) {
@@ -14,7 +23,7 @@ GraphiteGraphPlotter.prototype.updateChart = function(datalist) {
         if (datalist[i].length != this.dataNumber) continue;
         var dataStartPos = 0;
         var xCordValue = this.xVal;
-        if (this.withXCord){
+        if (this.withXCord) {
             dataStartPos = 1;
             xCordValue = datalist[i][0];
         }

@@ -20,11 +20,7 @@ $(function() {
     var firstLine = /^connecting at .+$/;
     $(document).on('serial_monitor_new_line', function(event, data) {
         if (firstLine.test(data)) return;
-        parser.addRawData(data);
-        if ((chartPlotter.dataNumber != parser.getdataNumber()) || (chartPlotter.withXCord != parser.isWithXCord())) {
-            chartPlotter.initGraph(parser.getdataNumber(),parser.isWithXCord());
-        }
-        chartPlotter.updateChart(parser.showNewData());
+        chartPlotter.addNewData(data);
     });
 
 
