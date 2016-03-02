@@ -1,9 +1,9 @@
 describe("StringScanner", function() {
     var scanner;
     it("should be able to recognise float numbers in an ordinary string", function() {
-        scanner = new StringScanner("2.5ok6.9what1.0 1,-1 1.");
+        scanner = new StringScanner("2.5ok0.9what1.0 1,-1 1.");
         expect(scanner.nextFloat()).toEqual(2.5);
-        expect(scanner.nextFloat()).toEqual(6.9);
+        expect(scanner.nextFloat()).toEqual(0.9);
         expect(scanner.nextFloat()).toEqual(1.0);
         expect(scanner.nextFloat()).toEqual(1);
         expect(scanner.nextFloat()).toEqual(-1);
@@ -21,11 +21,10 @@ describe("StringScanner", function() {
         expect(scanner.reachedEnd()).toEqual(true);
     })
 
-    it("has no problem with incomplete negative number", function() {
+    it("has no problem with incomplete decimal number", function() {
         scanner = new StringScanner("1.2 1.");
         expect(scanner.nextFloat()).toEqual(1.2);
         expect(scanner.nextFloat()).toEqual(1);
-        expect(scanner.current()).toEqual('.');
     })
 
     it("should be stop at delimeter", function() {
@@ -37,7 +36,7 @@ describe("StringScanner", function() {
     })
 
     it("should stop at first character if it's delimeter", function() {
-        scanner = new StringScanner("\n1.2");
+        scanner = new StringScanner("\n1.2 ");
         expect(scanner.nextFloat()).toEqual(null);
         expect(scanner.nextFloat()).toEqual(1.2);
     })

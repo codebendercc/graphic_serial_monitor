@@ -43,7 +43,8 @@ GraphiteDataParser = function() {
         var scanner = new StringScanner(rawData);
         var value;
         while (value = scanner.nextFloat()) {
-            if (this.checkAndProcessIncompleteSegment(scanner, value)) {
+            if (scanner.reachedEnd()){
+                this.processIncompleteSegment(scanner);
                 break;
             }
             this.dataStorage.push([value]);
@@ -72,14 +73,13 @@ GraphiteDataParser = function() {
                     if (this.withXCord) {
                         this.hasIncrementalX();
                     }
+                    continue;
                 }
-                continue;
             }
-
-            if (this.checkAndProcessIncompleteSegment(scanner, value)) {
+            if (scanner.reachedEnd()){
+                this.processIncompleteSegment(scanner);
                 break;
             }
-
             this.pendingData.push(value);
         }
         this.checkNegativeSignEnding(scanner);
@@ -97,23 +97,17 @@ GraphiteDataParser = function() {
 
     /**
      * check whether the current data stream has reached end and it ends with (potentially) incomplete data
-       if has incomplete data, put it in incompleteSegment and return true
-     * @return {boolean}
+       if has incomplete data, put it in incompleteSegment
+     *
      */
-    this.checkAndProcessIncompleteSegment = function(scanner, value) {
-        if (scanner.reachedEnd()) {
-            this.incompleteNumberSegment = value + '';
-            return true;
-        }
-        if (scanner.reachedEnd(scanner.cur + 1) && scanner.current() == '.') {
-            this.incompleteNumberSegment = value + '.';
-            return true;
-        }
-        return false;
+    this.processIncompleteSegment = function(scanner) {
+        scanner.rollback();
+        console.log(scanner.cur);
+        this.incompleteNumberSegment = scanner.remaining();
     }
 
-    this.isWithXCord =  function() {
-        if (this.dataNumber > 1){
+    this.isWithXCord = function() {
+        if (this.dataNumber > 1) {
             return this.withXCord;
         }
         return false;
@@ -161,6 +155,7 @@ GraphiteDataParser.MULTI_DATA_WITH_X = 2; //not yet implemented
  * add new raw string into the parser
  */
 GraphiteDataParser.prototype.addRawData = function(rawData) {
+    console.log(rawData);
     switch (this.dataFormat) {
         case GraphiteDataParser.ONE_LINER_TYPE:
             this.processOneLinerFormat(rawData);

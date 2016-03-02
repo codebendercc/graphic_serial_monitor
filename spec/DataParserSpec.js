@@ -159,7 +159,26 @@ describe("DataParser", function() {
             expect(parser.getdataNumber()).toEqual(2);
         });
 
-        it("should be able to handle incomplete data that crosses multiple lines", function() {
+        it("should be able to handle incomplete data that crosses multiple lines#1", function() {
+            parser.addRawData("3")
+            parser.addRawData("0.08 \n")
+            expect(parser.showNewData()).toEqual([
+                [30.08]
+            ]);
+            expect(parser.getdataNumber()).toEqual(1);
+        });
+
+        it("should be able to handle incomplete data that crosses multiple lines#2", function() {
+            parser.addRawData("30.0");
+            parser.addRawData("8 \n");
+            expect(parser.showNewData()).toEqual([
+                [30.08]
+            ]);
+            expect(parser.getdataNumber()).toEqual(1);
+        });
+
+
+        it("should be able to handle incomplete data that crosses multiple lines#3", function() {
             parser.addRawData("2")
             parser.addRawData("3")
             parser.addRawData("4")

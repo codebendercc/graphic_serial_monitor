@@ -3,6 +3,7 @@ StringScanner = function(data, delimiter) {
     this.delimiter = delimiter || "\n";
     this.data = data;
     this.cur = 0;
+    this.previousPos = 0;
 
     //////////////////////
     //PRIVILEGED METHODS//
@@ -44,6 +45,20 @@ StringScanner = function(data, delimiter) {
     this.isDelimiter = function(currentChar) {
         return this.delimiter == currentChar;
     }
+
+    this.getNextDecimalPart = function() {
+        var value = 0;
+        var count = -1;
+        while (!this.reachedEnd()) {
+            if (!is_numeric(this.current())) {
+                break;
+            }
+            value += parseInt(this.current()) * Math.pow(10, count);
+            count--;
+            this.cur++;
+        }
+        return value;
+    }
 }
 //////////////////
 //PUBLIC METHODS//
@@ -70,37 +85,42 @@ StringScanner.prototype.reachedEnd = function(pos) {
  * @return {number} will return null if there is no number next
  */
 StringScanner.prototype.nextFloat = function() {
+    this.previousPos = this.cur;
     var integerPart = this.nextInt();
     if (integerPart == null) {
         return null;
     }
-    if (this.reachedEnd() || !is_decimal_point(this.data.charAt(this.cur)) || this.isDelimiter(this.current())) {
-        return integerPart;
-    }
-    if (!is_numeric(this.data.charAt(this.cur + 1))) {
+    if (this.reachedEnd() || !is_decimal_point(this.current()) || this.isDelimiter(this.current())) {
         return integerPart;
     }
     this.cur++;
-    var decimalPart = this.nextInt();
-    return parseFloat(integerPart + '.' + decimalPart);
+    if (!is_numeric(this.current())) {
+        return integerPart;
+    }
+    var decimalPart = this.getNextDecimalPart();
+    if (integerPart >= 0) {
+        return integerPart + decimalPart;
+    }
+    return integerPart - decimalPart;
 }
 
 /**
- * get the next available integer 
+ * get the next available integer
  * @return {number} will return null if there is no integer next
  */
 StringScanner.prototype.nextInt = function() {
+    this.previousPos = this.cur;
     var start = this.moveToStartOfNextNumber();
     if (start == -1) {
         return null;
     }
-    if (this.isDelimiter(this.data.charAt(this.cur))) {
+    if (this.isDelimiter(this.current())) {
         this.cur++;
         return null;
     }
     this.cur++;
     while (!this.reachedEnd()) {
-        if (!is_numeric(this.data.charAt(this.cur))) {
+        if (!is_numeric(this.current())) {
             break;
         }
         this.cur++;
@@ -109,7 +129,7 @@ StringScanner.prototype.nextInt = function() {
 }
 
 /**
- * get the next available character 
+ * get the next available character
  * @return {string} will return null if there is no character left
  */
 StringScanner.prototype.nextChar = function() {
@@ -122,7 +142,7 @@ StringScanner.prototype.nextChar = function() {
 }
 
 /**
- * get the next string segment before the next delimeter 
+ * get the next string segment before the next delimeter
  * @return {string} will return null if there is nothing left
  */
 StringScanner.prototype.next = function() {
@@ -165,6 +185,17 @@ StringScanner.prototype.last = function() {
     return this.data.charAt(this.data.length - 1);
 }
 
+/**
+ * get the remaining characters of the string
+ * @return {string}
+ */
+StringScanner.prototype.remaining = function() {
+    return this.data.substring(this.cur);
+}
+
+StringScanner.prototype.rollback = function() {
+    this.cur = this.previousPos;
+}
 /////////////////////
 //UTILITY FUNCTIONS//
 /////////////////////
