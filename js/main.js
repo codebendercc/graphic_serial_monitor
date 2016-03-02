@@ -30,9 +30,16 @@ $(function() {
         clearData();
     });
 
-    // When button to clear data is clicked, clear previous data from chart
-    $('#clear-data').on('click', function() {
-        clearData();
+    // When button to clear data is clicked, pause/unpause the chart
+    $('#pause').on('click', function() {
+        chartPlotter.togglePause();
+        if($('#pause').text() == 'Pause'){
+            $('#pause').text('Start');
+            $('#pause').attr('class', 'btn btn-success btn-block');
+            return;
+        }
+        $('#pause').text('Pause');
+        $('#pause').attr('class', 'btn btn-danger btn-block');
     });
 
     /**

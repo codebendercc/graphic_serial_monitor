@@ -8,6 +8,7 @@ GraphiteGraphPlotter = function(div) {
     this.xVal = 0;
     this.dataLength = 50;
     this.dataparser = new GraphiteDataParser();
+    this.isPaused = false;
 
     /////////////////////
     //PROTECTED METHODS//
@@ -73,7 +74,7 @@ GraphiteGraphPlotter = function(div) {
 }
 
 /**
- * add raw data into chart 
+ * add raw data into chart
  * @params {string} rawData - string of unprocessed data
  */
 GraphiteGraphPlotter.prototype.addNewData = function(rawData) {
@@ -81,7 +82,21 @@ GraphiteGraphPlotter.prototype.addNewData = function(rawData) {
     if ((this.dataNumber != this.dataparser.getdataNumber()) || (this.withXCord != this.dataparser.isWithXCord())) {
         this.initGraph(this.dataparser.getdataNumber(), this.dataparser.isWithXCord());
     }
-    this.updateChart(this.dataparser.showNewData());
+    if (!this.isPaused) {
+        this.updateChart(this.dataparser.showNewData());
+    }
+}
+
+GraphiteGraphPlotter.prototype.pause = function() {
+    this.isPaused = true;
+}
+
+GraphiteGraphPlotter.prototype.unpause = function() {
+    this.isPaused = false;
+}
+
+GraphiteGraphPlotter.prototype.togglePause = function() {
+    this.isPaused = !this.isPaused;
 }
 
 function fillArray(content, amount) {
