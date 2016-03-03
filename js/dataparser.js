@@ -155,7 +155,6 @@ GraphiteDataParser.MULTI_DATA_WITH_X = 2; //not yet implemented
  * add new raw string into the parser
  */
 GraphiteDataParser.prototype.addRawData = function(rawData) {
-    console.log(rawData);
     switch (this.dataFormat) {
         case GraphiteDataParser.ONE_LINER_TYPE:
             this.processOneLinerFormat(rawData);

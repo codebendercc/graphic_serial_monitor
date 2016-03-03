@@ -42,6 +42,10 @@ $(function() {
         $('#pause').attr('class', 'btn btn-danger btn-block');
     });
 
+    $('#import-csv').on('click', function() {
+        chartPlotter.exportCSV();
+    });
+
     /**
      * Clears all data from the sensors, refreshing the chart
      */

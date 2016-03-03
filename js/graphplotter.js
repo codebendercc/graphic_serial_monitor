@@ -99,6 +99,19 @@ GraphiteGraphPlotter.prototype.togglePause = function() {
     this.isPaused = !this.isPaused;
 }
 
+GraphiteGraphPlotter.prototype.exportCSV = function() {
+    var data = this.dataparser.showAllData();
+    var csvContent = "data:text/csv;charset=utf-8,";
+    data.forEach(function(infoArray, index) {
+
+        dataString = infoArray.join(",");
+        csvContent += index < data.length ? dataString + "\n" : dataString;
+
+    });
+    var encodedUri = encodeURI(csvContent);
+    window.open(encodedUri);
+}
+
 function fillArray(content, amount) {
     tempArray = [];
     for (var i = 0; i < amount; i++) {
