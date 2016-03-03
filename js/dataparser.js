@@ -43,7 +43,8 @@ GraphiteDataParser = function() {
         var scanner = new StringScanner(rawData);
         var value;
         while (value = scanner.nextFloat()) {
-            if (this.checkAndProcessIncompleteSegment(scanner, value)) {
+            if (scanner.reachedEnd()){
+                this.processIncompleteSegment(scanner);
                 break;
             }
             this.dataStorage.push([value]);
@@ -69,14 +70,16 @@ GraphiteDataParser = function() {
                     this.dataNumber = this.pendingData.length;
                     this.dataStorage.push(this.pendingData);
                     this.pendingData = [];
+                    if (this.withXCord) {
+                        this.hasIncrementalX();
+                    }
+                    continue;
                 }
-                continue;
             }
-
-            if (this.checkAndProcessIncompleteSegment(scanner, value)) {
+            if (scanner.reachedEnd()){
+                this.processIncompleteSegment(scanner);
                 break;
             }
-
             this.pendingData.push(value);
         }
         this.checkNegativeSignEnding(scanner);
@@ -94,28 +97,33 @@ GraphiteDataParser = function() {
 
     /**
      * check whether the current data stream has reached end and it ends with (potentially) incomplete data
-       if has incomplete data, put it in incompleteSegment and return true
-     * @return {boolean}
+       if has incomplete data, put it in incompleteSegment
+     *
      */
-    this.checkAndProcessIncompleteSegment = function(scanner, value) {
-        if (scanner.reachedEnd()) {
-            this.incompleteNumberSegment = value + '';
-            return true;
-        }
-        if (scanner.reachedEnd(scanner.cur + 1) && scanner.current() == '.') {
-            this.incompleteNumberSegment = value + '.';
-            return true;
+    this.processIncompleteSegment = function(scanner) {
+        scanner.rollback();
+        console.log(scanner.cur);
+        this.incompleteNumberSegment = scanner.remaining();
+    }
+
+    this.isWithXCord = function() {
+        if (this.dataNumber > 1) {
+            return this.withXCord;
         }
         return false;
     }
 
-    //check whether the first data in the line is strictly incremental
-    //only check the last two because we are doing this check for every new line
+    /**
+     * check whether the data stream has an x-axis (assumed to be )
+     */
     this.hasIncrementalX = function() {
-        if (this.dataStorage.length <= 1) { //there is only one or no line
-            return true;
+        //there is only one or less line
+        if (this.dataStorage.length <= 1) {
+            return;
         }
-        return (this.dataStorage[this.dataStorage.length - 1][0] > this.dataStorage[this.dataStorage.length - 2][0]);
+        if (this.dataStorage[this.dataStorage.length - 1][0] < this.dataStorage[this.dataStorage.length - 2][0]) {
+            this.withXCord = false;
+        }
     }
 }
 
@@ -144,8 +152,8 @@ time: 5 temperature: 4 pressure: 43
 GraphiteDataParser.MULTI_DATA_WITH_X = 2; //not yet implemented
 
 /**
-* add new raw string into the parser
-*/
+ * add new raw string into the parser
+ */
 GraphiteDataParser.prototype.addRawData = function(rawData) {
     switch (this.dataFormat) {
         case GraphiteDataParser.ONE_LINER_TYPE:
@@ -154,19 +162,14 @@ GraphiteDataParser.prototype.addRawData = function(rawData) {
         case GraphiteDataParser.MULTI_LINE_TYPE:
             this.processMultilineFormat(rawData);
             break;
-        case GraphiteDataParser.MULTI_DATA_WITH_X:
-            this.processMultiDataWithXFormat(rawData);
-            break;
-        default:
-            throw "how did you even reach here"
     }
 
 }
 
 /**
-* get a list of data that has not been read
-* @return {array<array<integer>>}
-*/
+ * get a list of data that has not been read
+ * @return {array<array<integer>>}
+ */
 GraphiteDataParser.prototype.showNewData = function() {
     tempList = this.dataStorage.slice(this.currentDisplayedIndex);
     this.currentDisplayedIndex = this.dataStorage.length;
@@ -174,26 +177,26 @@ GraphiteDataParser.prototype.showNewData = function() {
 }
 
 /**
-* get all data that is stored in the parser in a nested array
-* @return {array<array<number>>}
-*/
+ * get all data that is stored in the parser in a nested array
+ * @return {array<array<number>>}
+ */
 GraphiteDataParser.prototype.showAllData = function() {
     return this.dataStorage;
 }
 
 /**
-* get number of data types,which determines number of lines on the linear graph 
-* @return {number}
-*/
+ * get number of data types,which determines number of lines on the linear graph
+ * @return {number}
+ */
 GraphiteDataParser.prototype.getdataNumber = function() {
     return this.dataNumber || 1;
 }
 
 /**
-* 'unnest' a nested array
-* @param {array<array<number>>} 
-* @return {array<number>}
-*/
+ * 'unnest' a nested array
+ * @param {array<array<number>>}
+ * @return {array<number>}
+ */
 function flatten(list) {
     return [].concat.apply([], list);
 }

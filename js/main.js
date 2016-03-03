@@ -17,18 +17,10 @@ $(function() {
     /**
      * Runs whenever new data is detected on serial monitor
      */
-    var withXCord;
     var firstLine = /^connecting at .+$/;
     $(document).on('serial_monitor_new_line', function(event, data) {
         if (firstLine.test(data)) return;
-        parser.addRawData(data);
-        if (withXCord == null) {
-            withXCord = parser.withXCord;
-        }
-        if (chartPlotter.dataNumber != parser.getdataNumber()) {
-            chartPlotter.initGraph(parser.getdataNumber());
-        }
-        chartPlotter.updateChart(parser.showNewData());
+        chartPlotter.addNewData(data);
     });
 
 
@@ -38,20 +30,26 @@ $(function() {
         clearData();
     });
 
-    // When button to clear data is clicked, clear previous data from chart
-    $('#clear-data').on('click', function() {
-        clearData();
+    // When button to clear data is clicked, pause/unpause the chart
+    $('#pause').on('click', function() {
+        chartPlotter.togglePause();
+        if($('#pause').text() == 'Pause'){
+            $('#pause').text('Start');
+            $('#pause').attr('class', 'btn btn-success btn-block');
+            return;
+        }
+        $('#pause').text('Pause');
+        $('#pause').attr('class', 'btn btn-danger btn-block');
+    });
+
+    $('#import-csv').on('click', function() {
+        chartPlotter.exportCSV();
     });
 
     /**
      * Clears all data from the sensors, refreshing the chart
      */
     function clearData() {
-        /*
-        sensorArray.forEach(function(val, index) {
-            val.length = 0;
-        });
-        window.myLineChart.render();*/
-        parser = new GraphiteGraphPlotter();
+        chartPlotter = new GraphiteGraphPlotter("chartContainer");
     }
 });
