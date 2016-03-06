@@ -3,74 +3,35 @@ Graphs for the codebender serial monitor
 
 http://graphite.codebender.cc/
 
-
-Test Sketch: https://codebender.cc/sketch:166269
-
-Currently Supported Sensors:
-- Temperature in Celsius [C]
-- Temperature in Fahrenheit [F]
-- Atmospheric Pressure [p]
-- Moisture [m]
-- Alcohol Concentration [a]
-- Decibel Level [D]
-- Light Intensity [L]
-- Magnetic Field [T]
-
 # How it works
 
 - Reads input sent from arduino to serial monitor
-- If data in serial monitor is a number followed by one of the alphabets above, it is from a recognized sensor
-- Inputs the data into the chart
+- If data in serial monitor follows one of the patterns listed below, a chart will be plotted
 
-# Example serial monitor data:
+# Patterns
 
-```
-   67F,
-   29C, 33C
-   1358p,
-   70F,
-   30C,34C
-   1320p,73F,
-   32C,35C
-   1290p,72F,
-   30C,34C
-   70F,
-   28C,32C
-   1333p,1305p,1394p,1355p,1411p,1421p,68F,
-```
-
-Data can be either single line, or multi line. If single line, make it comma separated.
-
-
-# Todo
-
-- Currently it accepts data only from 1 sensor of each type, we want it to accept data from multiple sensors of one type
-
-The following steps need to be done to add this functionality:-
-1) In the getData function, split data first by new line into array1
-2) Run a loop on array1 and split data by comma into array2
-3) Run a nested loop on array2 add the value to the return array, in the new object being added, specify whether the integer value of sensor.
-
-- Therefore the following three steps will manipulate the data in the following fashion:
-
-- Original data:
+- One-liner: this data pattern consists of one continous line of data. Example:
 
 ```
-   67F, 70F,
-   29C, 33C, 30C, 34C
-   1358p, 1320p,
+   data: 11 22 33 44 33 22 33.2 11.2 44.3 44.5 11.2 33.4...
 ```
 
-- array1 after split:
+- Multiple-liner: this data pattern consists of multiple lines, each lines contains of same number of data. Example:
 
 ```
-index 0: 67F, 70F,
-index 1: 29C, 33C, 30C, 34C
-index 2: 1358p, 1320p,
+   pressure:100 Voltage:22.1V Moisture: 21.1
+   pressure:102 Voltage:22.0V Moisture: 21.2
+   pressure:101 Voltage:22.0V Moisture: 21.1
+   pressure:103 Voltage:22.0V Moisture: 21.1
+   ....
 ```
 
-- Here 29C is first sensor celsius temperature sensor, 33C is from second sensor, 30C is from third sensor and so on.
+- Multiple-liner with x-coordinate: this data pattern consists of multiple lines, each lines contains of same number of data. However, the first data of each line is the x-coordinate of the rest of the data. (The x-coordinates must be strictly incremental) Example:
 
-4) In addElement function, check integer value of sensor
-5) If array for sensor with that integer value doesnt exist, then dynamically create an array and add the data to it
-6) If the array exists just add the data to the array
+```
+   timestamp： 10303301 pressure:100 Voltage:22.1V Moisture: 21.1
+   timestamp： 10303313 pressure:102 Voltage:22.0V Moisture: 21.2
+   timestamp： 10303315 pressure:101 Voltage:22.0V Moisture: 21.1
+   timestamp： 10303422 pressure:103 Voltage:22.0V Moisture: 21.1
+   ....
+```
