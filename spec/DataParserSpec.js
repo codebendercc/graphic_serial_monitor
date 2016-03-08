@@ -5,6 +5,40 @@ describe("DataParser", function() {
         parser = new GraphiteDataParser();
     });
 
+    describe("when recording frequencies of number ", function() {
+        it("should be able to handle one-liner normal data", function() {
+            parser.addRawData("2 ")
+            parser.addRawData("2 ")
+            parser.addRawData("3 ")
+            parser.addRawData("4 ")
+            parser.addRawData("5 ")
+            expect(parser.getFrequencies()[2]).toEqual(2);
+            expect(parser.getFrequencies()[3]).toEqual(1);
+            expect(parser.getFrequencies()[4]).toEqual(1);
+            expect(parser.getFrequencies()[5]).toEqual(1);
+        });
+
+        it("should be able to handle multiple-line normal data", function() {
+            parser.addRawData("2 2\n")
+            parser.addRawData("2 3\n")
+            parser.addRawData("3.0 1\n ")
+            parser.addRawData("4 2\n")
+            parser.addRawData("5 5\n ")
+            expect(parser.getFrequencies()[2]).toEqual(4);
+            expect(parser.getFrequencies()[3]).toEqual(2);
+            expect(parser.getFrequencies()[4]).toEqual(1);
+            expect(parser.getFrequencies()[5]).toEqual(2);
+        });
+
+        it("should be able to stop recording if there are too many different values", function() {
+            parser.addRawData("1 2.2 3 4.2 ")
+            parser.addRawData("1 2 3 4 5 ")
+            parser.addRawData("32 41 10 14 15 ")
+            expect(parser.getFrequencies()).toEqual(null);
+            expect(parser.isRecordingFrequencies).toEqual(false);
+        });
+    });
+
     describe("when each segment of data is complete ", function() {
         it("should be able to handle normal multiple line data", function() {
             parser.addRawData("1 2.2 \n")
@@ -205,4 +239,6 @@ describe("DataParser", function() {
 
 
     });
+
+
 });

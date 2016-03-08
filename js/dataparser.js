@@ -17,6 +17,12 @@ GraphiteDataParser = function() {
     //store incomplete data segement from the previous raw data stream
     //for example: "xxxxxx 1.2" or "xxxxx 1."
     this.incompleteNumberSegment = null;
+    //Frequency of datas
+    this.frequencies = {};
+    //max number of values allowed in frequency recording
+    this.frequencyMax = 10;
+    //indicates whether the program should continue recording the frequencies
+    this.isRecordingFrequencies = true;
 
     /////////////////////
     //PROTECTED METHODS//
@@ -43,10 +49,11 @@ GraphiteDataParser = function() {
         var scanner = new StringScanner(rawData);
         var value;
         while (value = scanner.nextFloat()) {
-            if (scanner.reachedEnd()){
+            if (scanner.reachedEnd()) {
                 this.processIncompleteSegment(scanner);
                 break;
             }
+            this.processFrequencies(value);
             this.dataStorage.push([value]);
         }
         this.checkNegativeSignEnding(scanner);
@@ -76,15 +83,36 @@ GraphiteDataParser = function() {
                     continue;
                 }
             }
-            if (scanner.reachedEnd()){
+            if (scanner.reachedEnd()) {
                 this.processIncompleteSegment(scanner);
                 break;
             }
+            this.processFrequencies(value);
             this.pendingData.push(value);
         }
         this.checkNegativeSignEnding(scanner);
     }
 
+    /**
+     * process the value for the frequency count
+     * if there are more than 10 differenet values, stop recording frequency
+     * @params {number} value - value to be processed
+     */
+    this.processFrequencies = function(value) {
+        if (!this.isRecordingFrequencies) {
+            return;
+        }
+        if (this.frequencies[value] == undefined) {
+            //new value
+            if (Object.keys(this.frequencies).length == this.frequencyMax) {
+                this.isRecordingFrequencies = false;
+                return;
+            }
+            this.frequencies[value] = 1;
+            return;
+        }
+        this.frequencies[value]++;
+    }
     /**
      * check whether the current data ends with a negative sign
      * @return {boolean}
@@ -102,7 +130,6 @@ GraphiteDataParser = function() {
      */
     this.processIncompleteSegment = function(scanner) {
         scanner.rollback();
-        console.log(scanner.cur);
         this.incompleteNumberSegment = scanner.remaining();
     }
 
@@ -192,6 +219,17 @@ GraphiteDataParser.prototype.getdataNumber = function() {
     return this.dataNumber || 1;
 }
 
+
+/**
+ * get frequency hashmap
+ * @return {hashn=map} {value:number of appearances}, if it has stopped recording, return null
+ */
+GraphiteDataParser.prototype.getFrequencies = function() {
+    if (this.isRecordingFrequencies) {
+        return this.frequencies;
+    }
+    return null;
+}
 /**
  * 'unnest' a nested array
  * @param {array<array<number>>}
