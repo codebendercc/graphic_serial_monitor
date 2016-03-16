@@ -9,6 +9,7 @@ GraphiteGraphPlotter = function(div) {
     this.dataLength = 50;
     this.dataparser = new GraphiteDataParser();
     this.isPaused = false;
+    this.graphType = GraphiteGraphPlotter.LINE_GRAPH;
 
     /////////////////////
     //PROTECTED METHODS//
@@ -18,7 +19,7 @@ GraphiteGraphPlotter = function(div) {
      * @params {number} dataNumber - number of data per line
      * @params {boolean} withXCord - whether the first number of the line is the x-coordinate
      */
-    this.initGraph = function(dataNumber, withXCord) {
+    this.initLineGraph = function(dataNumber, withXCord) {
         this.xVal = 0;
         this.dataNumber = dataNumber || 1;
         this.withXCord = (typeof withXCord !== 'undefined') ? withXCord : false;
@@ -26,9 +27,9 @@ GraphiteGraphPlotter = function(div) {
         if (withXCord) {
             dataStartPos = 1;
         }
-        this.dps = fillArray([], dataNumber);
+        this.dps = fillArray([], this.dataNumber);
         var tempData = [];
-        for (var i = dataStartPos; i < dataNumber; i++) {
+        for (var i = dataStartPos; i < this.dataNumber; i++) {
             tempData.push({
                 type: "line",
                 name: "data" + i,
@@ -43,11 +44,53 @@ GraphiteGraphPlotter = function(div) {
         });
     }
 
+    this.initBarGraph = function() {
+        this.dps = [];
+        if (this.dataparser.getFrequencies() == null){
+            this.switchToLineGraph();
+            return;
+        }
+        var keys = Object.keys(this.dataparser.getFrequencies());
+        for (var i = 0; i < keys.length; i++) {
+            this.dps.push({
+                label: keys[i],
+                y: this.dataparser.getFrequencies()[keys[i]]
+            })
+        }
+        this.chart = new CanvasJS.Chart(this.div, {
+            title: {
+                text: "geia sou kosmos"
+            },
+            data: [{
+                type: "column",
+                bevelEnabled: true,
+                dataPoints: this.dps
+            }]
+        });
+        this.chart.render();
+    }
+
+    this.updateBarGraph = function() {
+        if (this.dataparser.getFrequencies() == null){
+            this.switchToLineGraph();
+            return;
+        }
+        var keys = Object.keys(this.dataparser.getFrequencies());
+        for (var i = 0; i < keys.length; i++) {
+            this.dps[i] = ({
+                label: keys[i],
+                y: this.dataparser.getFrequencies()[keys[i]]
+            })
+        }
+        this.chart.render();
+    }
+
+
     /**
      * update the chart using list of data
      * @params {array} datalist - number of data per line
      */
-    this.updateChart = function(datalist) {
+    this.updateLineGraph = function(datalist) {
         for (var i = 0; i < datalist.length; i++) {
             if (datalist[i].length != this.dataNumber) continue;
             var dataStartPos = 0;
@@ -70,7 +113,7 @@ GraphiteGraphPlotter = function(div) {
         this.chart.render();
     };
 
-    this.initGraph();
+    this.initLineGraph();
 }
 
 /**
@@ -79,12 +122,36 @@ GraphiteGraphPlotter = function(div) {
  */
 GraphiteGraphPlotter.prototype.addNewData = function(rawData) {
     this.dataparser.addRawData(rawData);
-    if ((this.dataNumber != this.dataparser.getdataNumber()) || (this.withXCord != this.dataparser.isWithXCord())) {
-        this.initGraph(this.dataparser.getdataNumber(), this.dataparser.isWithXCord());
+    switch (this.graphType) {
+        case GraphiteGraphPlotter.LINE_GRAPH:
+
+            if ((this.dataNumber != this.dataparser.getdataNumber()) || (this.withXCord != this.dataparser.isWithXCord())) {
+                this.initLineGraph(this.dataparser.getdataNumber(), this.dataparser.isWithXCord());
+            }
+            if (!this.isPaused) {
+                this.updateLineGraph(this.dataparser.showNewData());
+            }
+            break;
+        case GraphiteGraphPlotter.BAR_GRAPH:
+            if (!this.isPaused) {
+                this.initBarGraph();
+            }
+            break;
     }
-    if (!this.isPaused) {
-        this.updateChart(this.dataparser.showNewData());
-    }
+}
+
+GraphiteGraphPlotter.LINE_GRAPH = 0;
+
+GraphiteGraphPlotter.BAR_GRAPH = 1;
+
+GraphiteGraphPlotter.prototype.switchToLineGraph = function() {
+    this.graphType = GraphiteGraphPlotter.LINE_GRAPH;
+    this.initLineGraph(this.dataparser.getdataNumber(), this.dataparser.isWithXCord());
+}
+
+GraphiteGraphPlotter.prototype.switchToBarGraph = function() {
+    this.graphType = GraphiteGraphPlotter.BAR_GRAPH;
+    this.initBarGraph();
 }
 
 GraphiteGraphPlotter.prototype.pause = function() {
@@ -110,6 +177,10 @@ GraphiteGraphPlotter.prototype.exportCSV = function() {
     });
     var encodedUri = encodeURI(csvContent);
     window.open(encodedUri);
+}
+
+GraphiteGraphPlotter.prototype.isBarChartAvailable = function() {
+    return this.dataparser.isRecordingFrequencies;
 }
 
 function fillArray(content, amount) {

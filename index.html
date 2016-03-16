@@ -5,6 +5,7 @@
     <title>Serial Monitor Graph</title>
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
     <link rel='stylesheet' href="js/vendor/bootstrap-slider/bootstrap-slider.css">
+    <link rel='stylesheet' href="js/vendor/bootstrap-switch/bootstrap-switch.min.css">
     <link rel="stylesheet" href="js/vendor/sliptree-bootstrap-tokenfield-9c06df4/dist/css/bootstrap-tokenfield.min.css">
     <link rel="stylesheet" href="stylesheets/main.css">
 </head>
@@ -56,14 +57,17 @@
         
         <div class="row" style="margin-top:17px">
             <div class="col-md-2 col-md-offset-3">
-                <button id="import-csv" class="btn btn-default btn-block" style="margin-top: -7px;">import csv</button>
+                <button id="import-csv" class="btn btn-default btn-block" >import csv</button>
             </div>
             
             
             
             
             <div class="col-md-2">
-                <button id="pause" class="btn btn-danger btn-block" style="margin-top: -7px;">Pause</button>
+                <button id="pause" class="btn btn-danger btn-block">Pause</button>
+            </div>
+            <div class="col-md-2">
+            	<input type="checkbox" name="chart-checkbox" id="checkbox" data-on-text="LINE" data-off-text="BAR" checked>
             </div>
 
         </div>
@@ -75,6 +79,8 @@
     <script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
 	<script src="js/vendor/bootstrap-slider/bootstrap-slider.js"></script>
+	<script src="js/vendor/bootstrap-switch/bootstrap-switch.min.js"></script>
+
 
     <script src="js/vendor/canvasjs.min.js"></script>
     <script src="js/vendor/sliptree-bootstrap-tokenfield-9c06df4/dist/bootstrap-tokenfield.js"></script>
