@@ -37,9 +37,6 @@ GraphiteGraphPlotter = function(div) {
             });
         }
         this.chart = new CanvasJS.Chart(this.div, {
-            title: {
-                text: "geia sou kosmos"
-            },
             data: tempData
         });
     }
@@ -58,9 +55,6 @@ GraphiteGraphPlotter = function(div) {
             })
         }
         this.chart = new CanvasJS.Chart(this.div, {
-            title: {
-                text: "geia sou kosmos"
-            },
             data: [{
                 type: "column",
                 bevelEnabled: true,
