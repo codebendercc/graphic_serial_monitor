@@ -11,9 +11,9 @@ GraphiteDataParser = function() {
     //1-D integer array of values scraped from raw data that is not ready to put into storage
     this.pendingData = [];
     //number of data types,which determines number of lines on the linear graph 
-    this.dataNumber = 1;
+    this.variableNumber = 1;
     //indicates whether the first of the data is used as the x-coordinate
-    this.withXCord = true;
+    this.withXCoordinates = true;
     //store incomplete data segement from the previous raw data stream
     //for example: "xxxxxx 1.2" or "xxxxx 1."
     this.incompleteNumberSegment = null;
@@ -74,10 +74,10 @@ GraphiteDataParser = function() {
             value = scanner.nextFloat();
             if (value == null) {
                 if (scanner.data.charAt(scanner.cur - 1) == '\n') {
-                    this.dataNumber = this.pendingData.length;
+                    this.variableNumber = this.pendingData.length;
                     this.dataStorage.push(this.pendingData);
                     this.pendingData = [];
-                    if (this.withXCord) {
+                    if (this.withXCoordinates) {
                         this.hasIncrementalX();
                     }
                     continue;
@@ -133,9 +133,9 @@ GraphiteDataParser = function() {
         this.incompleteNumberSegment = scanner.remaining();
     }
 
-    this.isWithXCord = function() {
-        if (this.dataNumber > 1) {
-            return this.withXCord;
+    this.hasXCoordinates = function() {
+        if (this.variableNumber > 1) {
+            return this.withXCoordinates;
         }
         return false;
     }
@@ -149,7 +149,7 @@ GraphiteDataParser = function() {
             return;
         }
         if (this.dataStorage[this.dataStorage.length - 1][0] < this.dataStorage[this.dataStorage.length - 2][0]) {
-            this.withXCord = false;
+            this.withXCoordinates = false;
         }
     }
 }
@@ -215,8 +215,8 @@ GraphiteDataParser.prototype.showAllData = function() {
  * get number of data types,which determines number of lines on the linear graph
  * @return {number}
  */
-GraphiteDataParser.prototype.getdataNumber = function() {
-    return this.dataNumber || 1;
+GraphiteDataParser.prototype.getvariableNumber = function() {
+    return this.variableNumber || 1;
 }
 
 

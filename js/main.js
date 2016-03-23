@@ -5,6 +5,7 @@ $(function() {
     // Initialize compilerflasher
     compilerflasher = new compilerflasher(function() {});
     var chartPlotter = new GraphiteGraphPlotter("chartContainer");
+    var isPaused = false;
     $("#checkbox").bootstrapSwitch();
     $("#checkbox").on('switchChange.bootstrapSwitch', function(event, state) {
         if(state){
@@ -33,7 +34,8 @@ $(function() {
     // When button to clear data is clicked, pause/unpause the chart
     $('#pause').on('click', function() {
         chartPlotter.togglePause();
-        if ($('#pause').text() == 'Pause') {
+        isPaused = !isPaused;
+        if (!isPaused) {
             $('#pause').text('Start');
             $('#pause').attr('class', 'btn btn-success btn-block');
             return;

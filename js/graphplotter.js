@@ -2,9 +2,9 @@
 GraphiteGraphPlotter = function(div) {
     this.div = div;
     this.chart;
-    this.dps; //datapoints
-    this.dataNumber;
-    this.withXCord;
+    this.dataPoints; //datapoints
+    this.variableNumber;
+    this.withXCoordinates;
     this.xVal = 0;
     this.dataLength = 50;
     this.dataparser = new GraphiteDataParser();
@@ -16,24 +16,27 @@ GraphiteGraphPlotter = function(div) {
     /////////////////////
     /**
      * initialize the graph
-     * @params {number} dataNumber - number of data per line
-     * @params {boolean} withXCord - whether the first number of the line is the x-coordinate
+     * @params {number} variableNumber - number of data per line
+     * @params {boolean} withXCoordinates - whether the first number of the line is the x-coordinate
      */
-    this.initLineGraph = function(dataNumber, withXCord) {
+    this.initLineGraph = function(variableNumber, withXCoordinates) {
         this.xVal = 0;
-        this.dataNumber = dataNumber || 1;
-        this.withXCord = (typeof withXCord !== 'undefined') ? withXCord : false;
+        this.variableNumber = variableNumber || 1;
+        this.withXCoordinates = withXCoordinates;
+        if (typeof withXCoordinates == 'undefined') {
+            this.withXCoordinates = false;
+        }
         var dataStartPos = 0;
-        if (withXCord) {
+        if (withXCoordinates) {
             dataStartPos = 1;
         }
-        this.dps = fillArray([], this.dataNumber);
+        this.dataPoints = fillArray([], this.variableNumber);
         var tempData = [];
-        for (var i = dataStartPos; i < this.dataNumber; i++) {
+        for (var i = dataStartPos; i < this.variableNumber; i++) {
             tempData.push({
                 type: "line",
                 name: "data" + i,
-                dataPoints: this.dps[i]
+                dataPoints: this.dataPoints[i]
             });
         }
         this.chart = new CanvasJS.Chart(this.div, {
@@ -42,14 +45,14 @@ GraphiteGraphPlotter = function(div) {
     }
 
     this.initBarGraph = function() {
-        this.dps = [];
-        if (this.dataparser.getFrequencies() == null){
+        this.dataPoints = [];
+        if (this.dataparser.getFrequencies() == null) {
             this.switchToLineGraph();
             return;
         }
         var keys = Object.keys(this.dataparser.getFrequencies());
         for (var i = 0; i < keys.length; i++) {
-            this.dps.push({
+            this.dataPoints.push({
                 label: keys[i],
                 y: this.dataparser.getFrequencies()[keys[i]]
             })
@@ -58,20 +61,20 @@ GraphiteGraphPlotter = function(div) {
             data: [{
                 type: "column",
                 bevelEnabled: true,
-                dataPoints: this.dps
+                dataPoints: this.dataPoints
             }]
         });
         this.chart.render();
     }
 
     this.updateBarGraph = function() {
-        if (this.dataparser.getFrequencies() == null){
+        if (this.dataparser.getFrequencies() == null) {
             this.switchToLineGraph();
             return;
         }
         var keys = Object.keys(this.dataparser.getFrequencies());
         for (var i = 0; i < keys.length; i++) {
-            this.dps[i] = ({
+            this.dataPoints[i] = ({
                 label: keys[i],
                 y: this.dataparser.getFrequencies()[keys[i]]
             })
@@ -86,20 +89,20 @@ GraphiteGraphPlotter = function(div) {
      */
     this.updateLineGraph = function(datalist) {
         for (var i = 0; i < datalist.length; i++) {
-            if (datalist[i].length != this.dataNumber) continue;
+            if (datalist[i].length != this.variableNumber) continue;
             var dataStartPos = 0;
             var xCordValue = this.xVal;
-            if (this.withXCord) {
+            if (this.withXCoordinates) {
                 dataStartPos = 1;
                 xCordValue = datalist[i][0];
             }
-            for (var j = dataStartPos; j < this.dps.length; j++) {
-                this.dps[j].push({
+            for (var j = dataStartPos; j < this.dataPoints.length; j++) {
+                this.dataPoints[j].push({
                     x: xCordValue,
                     y: datalist[i][j]
                 });
-                if (this.dps[j].length > this.dataLength) {
-                    this.dps[j].shift();
+                if (this.dataPoints[j].length > this.dataLength) {
+                    this.dataPoints[j].shift();
                 }
             }
             this.xVal++;
@@ -118,9 +121,10 @@ GraphiteGraphPlotter.prototype.addNewData = function(rawData) {
     this.dataparser.addRawData(rawData);
     switch (this.graphType) {
         case GraphiteGraphPlotter.LINE_GRAPH:
-
-            if ((this.dataNumber != this.dataparser.getdataNumber()) || (this.withXCord != this.dataparser.isWithXCord())) {
-                this.initLineGraph(this.dataparser.getdataNumber(), this.dataparser.isWithXCord());
+            differingVariableNumbers = (this.variableNumber != this.dataparser.getvariableNumber());
+            differingXcoordinateOptions = (this.withXCoordinates != this.dataparser.hasXCoordinates());
+            if (differingVariableNumbers || differingXcoordinateOptions) {
+                this.initLineGraph(this.dataparser.getvariableNumber(), this.dataparser.hasXCoordinates());
             }
             if (!this.isPaused) {
                 this.updateLineGraph(this.dataparser.showNewData());
@@ -140,7 +144,7 @@ GraphiteGraphPlotter.BAR_GRAPH = 1;
 
 GraphiteGraphPlotter.prototype.switchToLineGraph = function() {
     this.graphType = GraphiteGraphPlotter.LINE_GRAPH;
-    this.initLineGraph(this.dataparser.getdataNumber(), this.dataparser.isWithXCord());
+    this.initLineGraph(this.dataparser.getvariableNumber(), this.dataparser.hasXCoordinates());
 }
 
 GraphiteGraphPlotter.prototype.switchToBarGraph = function() {

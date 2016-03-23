@@ -1,6 +1,6 @@
 describe("StringScanner", function() {
     var scanner;
-    it("should be able to recognise float numbers in an ordinary string", function() {
+    it("can recognise float numbers in an ordinary string", function() {
         scanner = new StringScanner("2.5ok0.9what1.0 1,-1 1.");
         expect(scanner.nextFloat()).toEqual(2.5);
         expect(scanner.nextFloat()).toEqual(0.9);
@@ -9,67 +9,66 @@ describe("StringScanner", function() {
         expect(scanner.nextFloat()).toEqual(-1);
     });
 
-    it("should be able to return null if there is no float in the string", function() {
+    it("can return null if there is no float in the string", function() {
         scanner = new StringScanner("there is no string on me..");
         expect(scanner.nextFloat()).toEqual(null);
     })
 
-    it("has no problem with incomplete negative number", function() {
+    it("can handle incomplete negative number", function() {
         scanner = new StringScanner("1.2 -");
         expect(scanner.nextFloat()).toEqual(1.2);
         expect(scanner.nextFloat()).toEqual(null);
         expect(scanner.reachedEnd()).toEqual(true);
     })
 
-    it("has no problem with incomplete decimal number", function() {
+    it("can handle incomplete decimal number", function() {
         scanner = new StringScanner("1.2 1.");
         expect(scanner.nextFloat()).toEqual(1.2);
         expect(scanner.nextFloat()).toEqual(1);
     })
 
-    it("should be stop at delimeter", function() {
+    it("stops cursor at delimeter", function() {
         scanner = new StringScanner("1.2\n 2.2\n");
         expect(scanner.nextFloat()).toEqual(1.2);
-        console.log(scanner.cur);
         expect(scanner.nextFloat()).toEqual(null);
         expect(scanner.nextFloat()).toEqual(2.2);
     })
 
-    it("should stop at first character if it's delimeter", function() {
+    it("can stop cursor at first character if it's delimeter", function() {
         scanner = new StringScanner("\n1.2 ");
         expect(scanner.nextFloat()).toEqual(null);
         expect(scanner.nextFloat()).toEqual(1.2);
     })
 
-    it("should detect delimeter if it's the last char", function() {
+    it("can detect delimeter if it's the last char", function() {
         scanner = new StringScanner("1.2 \n");
         expect(scanner.nextFloat()).toEqual(1.2);
         expect(scanner.nextFloat()).toEqual(null);
         expect(scanner.data.charAt(scanner.cur - 1)).toEqual("\n");
     })
     
-    it("reset cursor works properly", function() {
+    it("can reset cursor properly", function() {
         scanner = new StringScanner("1a2b3c4d5");
         expect(scanner.nextFloat()).toEqual(1);
         scanner.resetCursor();
         expect(scanner.nextFloat()).toEqual(1);
     })
 
-    it("#nextChar", function() {
+    it("can get next Character using nextChar() method", function() {
         scanner = new StringScanner("1a");
         expect(scanner.nextFloat()).toEqual(1);
         expect(scanner.nextChar()).toEqual("a");
         expect(scanner.nextChar()).toEqual(null);
     })
 
-    it("#next", function() {
+    it("can get next string segment before next delimeter using next() method", function() {
         scanner = new StringScanner("1 this thing\n");
         expect(scanner.nextFloat()).toEqual(1);
         expect(scanner.next()).toEqual(" this thing");
         expect(scanner.next()).toEqual(null);
     })
 
-    it("#previous", function() {
+    it("can get the character before the cursor using next() method", function() {
         scanner = new StringScanner("112s123\n");
         expect(scanner.previous()).toEqual(null);
         expect(scanner.nextFloat()).toEqual(112);
