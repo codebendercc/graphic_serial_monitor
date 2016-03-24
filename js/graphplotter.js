@@ -36,6 +36,8 @@ GraphiteGraphPlotter = function(div) {
             tempData.push({
                 type: "line",
                 name: "data" + i,
+                legendText: "data " + (i + 1),
+                showInLegend: true, 
                 dataPoints: this.dataPoints[i]
             });
         }
