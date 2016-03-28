@@ -9,6 +9,12 @@ describe("StringScanner", function() {
         expect(scanner.nextFloat()).toEqual(-1);
     });
 
+    it("can recognise float numbers in an ordinary string", function() {
+        scanner = new StringScanner("61 -0.79\n");
+        expect(scanner.nextFloat()).toEqual(61);
+        expect(scanner.nextFloat()).toEqual(-0.79);
+    });
+
     it("can return null if there is no float in the string", function() {
         scanner = new StringScanner("there is no string on me..");
         expect(scanner.nextFloat()).toEqual(null);

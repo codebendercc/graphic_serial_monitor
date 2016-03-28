@@ -98,7 +98,7 @@ StringScanner.prototype.nextFloat = function() {
         return integerPart;
     }
     var decimalPart = this.getNextDecimalPart();
-    if (integerPart >= 0) {
+    if (is_positive(integerPart)) {
         return integerPart + decimalPart;
     }
     return integerPart - decimalPart;
@@ -210,4 +210,8 @@ function is_negative_sign(char) {
 
 function is_numeric(char) {
     return !isNaN(parseInt((char)));
+}
+
+function is_positive(number) {
+    return (1 / number > 0); // so that -0 will be recognized as negative
 }
