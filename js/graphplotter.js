@@ -37,11 +37,22 @@ GraphiteGraphPlotter = function(div) {
                 type: "line",
                 name: "data" + i,
                 legendText: "data " + (i + 1),
-                showInLegend: true, 
+                showInLegend: true,
                 dataPoints: this.dataPoints[i]
             });
         }
         this.chart = new CanvasJS.Chart(this.div, {
+            legend: {
+                cursor: "pointer",
+                itemclick: function(e) {
+                    if (typeof(e.dataSeries.visible) === "undefined" || e.dataSeries.visible) {
+                        e.dataSeries.visible = false;
+                    } else {
+                        e.dataSeries.visible = true;
+                    }
+                    e.chart.render();
+                }
+            },
             data: tempData
         });
     }
