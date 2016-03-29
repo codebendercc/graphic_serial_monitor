@@ -2,7 +2,7 @@
 GraphiteGraphPlotter = function(div) {
     this.div = div;
     this.chart;
-    this.dataPoints; //datapoints
+    this.dataPoints;
     this.variableNumber;
     this.withXCoordinates;
     this.xVal = 0;
@@ -10,6 +10,8 @@ GraphiteGraphPlotter = function(div) {
     this.dataparser = new GraphiteDataParser();
     this.isPaused = false;
     this.graphType = GraphiteGraphPlotter.LINE_GRAPH;
+    this.dataAmounts;
+    this.dataAverages;
 
     /////////////////////
     //PROTECTED METHODS//
@@ -31,6 +33,8 @@ GraphiteGraphPlotter = function(div) {
             dataStartPos = 1;
         }
         this.dataPoints = fillArray([], this.variableNumber);
+        this.dataAmounts = Array(this.variableNumber).fill(0);
+        this.dataAverages = Array(this.variableNumber).fill(0);
         var tempData = [];
         for (var i = dataStartPos; i < this.variableNumber; i++) {
             tempData.push({
@@ -110,6 +114,8 @@ GraphiteGraphPlotter = function(div) {
                 xCordValue = datalist[i][0];
             }
             for (var j = dataStartPos; j < this.dataPoints.length; j++) {
+                this.dataAmounts[j]++;
+                this.dataAverages[j] = (this.dataAverages[j] * (this.dataAmounts[j] - 1) + datalist[i][j]) / this.dataAmounts[j];
                 this.dataPoints[j].push({
                     x: xCordValue,
                     y: datalist[i][j]
@@ -192,6 +198,10 @@ GraphiteGraphPlotter.prototype.exportCSV = function() {
 
 GraphiteGraphPlotter.prototype.isBarChartAvailable = function() {
     return this.dataparser.isRecordingFrequencies;
+}
+
+GraphiteGraphPlotter.prototype.getAverages = function() {
+    return this.dataAverages;
 }
 
 function fillArray(content, amount) {
