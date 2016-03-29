@@ -34,14 +34,15 @@ $(function() {
     // When button to clear data is clicked, pause/unpause the chart
     $('#pause').on('click', function() {
         chartPlotter.togglePause();
-        isPaused = !isPaused;
         if (!isPaused) {
             $('#pause').text('Start');
             $('#pause').attr('class', 'btn btn-success btn-block');
+            isPaused = true;
             return;
         }
         $('#pause').text('Pause');
         $('#pause').attr('class', 'btn btn-danger btn-block');
+        isPaused = false;
     });
 
     $('#import-csv').on('click', function() {
