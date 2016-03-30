@@ -12,6 +12,9 @@ GraphiteGraphPlotter = function(div) {
     this.graphType = GraphiteGraphPlotter.LINE_GRAPH;
     this.dataAmounts;
     this.dataAverages;
+    this.dataStandardDevs;
+    this.dataMaxs;
+    this.dataMins;
 
     /////////////////////
     //PROTECTED METHODS//
@@ -35,6 +38,9 @@ GraphiteGraphPlotter = function(div) {
         this.dataPoints = fillArray([], this.variableNumber);
         this.dataAmounts = Array(this.variableNumber).fill(0);
         this.dataAverages = Array(this.variableNumber).fill(0);
+        this.dataStandardDevs = Array(this.variableNumber).fill(0);
+        this.dataMaxs = Array(this.variableNumber).fill(-Infinity);
+        this.dataMins = Array(this.variableNumber).fill(Infinity);
         var tempData = [];
         for (var i = dataStartPos; i < this.variableNumber; i++) {
             tempData.push({
@@ -46,6 +52,8 @@ GraphiteGraphPlotter = function(div) {
             });
         }
         this.chart = new CanvasJS.Chart(this.div, {
+            zoomEnabled: true,
+            exportEnabled: true,
             legend: {
                 cursor: "pointer",
                 itemclick: function(e) {
@@ -116,6 +124,13 @@ GraphiteGraphPlotter = function(div) {
             for (var j = dataStartPos; j < this.dataPoints.length; j++) {
                 this.dataAmounts[j]++;
                 this.dataAverages[j] = (this.dataAverages[j] * (this.dataAmounts[j] - 1) + datalist[i][j]) / this.dataAmounts[j];
+                this.dataStandardDevs[j] = Math.sqrt((Math.pow(this.dataStandardDevs[j], 2) * (this.dataAmounts[j] - 1) + Math.pow((this.dataAverages[j] - datalist[i][j]), 2)) / this.dataAmounts[j])
+                if (this.dataMaxs[j] < datalist[i][j]) {
+                    this.dataMaxs[j] = datalist[i][j];
+                }
+                if (this.dataMins[j] > datalist[i][j]) {
+                    this.dataMins[j] = datalist[i][j];
+                }
                 this.dataPoints[j].push({
                     x: xCordValue,
                     y: datalist[i][j]
@@ -202,6 +217,18 @@ GraphiteGraphPlotter.prototype.isBarChartAvailable = function() {
 
 GraphiteGraphPlotter.prototype.getAverages = function() {
     return this.dataAverages;
+}
+
+GraphiteGraphPlotter.prototype.getStandardDevs = function() {
+    return this.dataStandardDevs;
+}
+
+GraphiteGraphPlotter.prototype.getMaxs = function() {
+    return this.dataMaxs;
+}
+
+GraphiteGraphPlotter.prototype.getMins = function() {
+    return this.dataMins;
 }
 
 function fillArray(content, amount) {
