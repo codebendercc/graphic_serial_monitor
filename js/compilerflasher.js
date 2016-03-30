@@ -1405,6 +1405,7 @@ compilerflasher = function (loadFiles) {
                 .off('click')
                 .click(function () {
                     selfPh.connect();
+                    selfCf.eventManager.fire('serial-monitor-connected');
                 });
 
             this.connected = false;

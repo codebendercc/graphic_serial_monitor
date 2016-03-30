@@ -33,6 +33,7 @@ Graphite = function(graphiteConfig) {
         }
         this.switchButton = $('#' + switchButton);
         this.switchButton.bootstrapSwitch();
+        this.switchButton.bootstrapSwitch('disabled',false);
         var self = this;
         this.switchButton.on('switchChange.bootstrapSwitch', function(event, state) {
             if (state) {
@@ -47,7 +48,10 @@ Graphite = function(graphiteConfig) {
         if (typeof pauseButton == 'undefined') {
             pauseButton = "graphite_pause_button";
         }
+        this.isPaused = false;
         this.pauseButton = $('#' + pauseButton);
+        this.pauseButton.text('Pause');
+        this.pauseButton.attr('class', 'btn btn-danger btn-block');
         var self = this;
         this.pauseButton.on('click', function() {
             self.chartPlotter.togglePause();
@@ -67,7 +71,7 @@ Graphite = function(graphiteConfig) {
         if (!this.switchButton[0].checked && !this.chartPlotter.isBarChartAvailable()) {
             this.chartPlotter.switchToLineGraph();
             this.switchButton.bootstrapSwitch('state', true, true);
-            this.switchButton.bootstrapSwitch('toggleDisabled', true, true);
+            this.switchButton.bootstrapSwitch('disabled',true);
         }
     }
 
@@ -82,8 +86,13 @@ Graphite = function(graphiteConfig) {
 }
 
 Graphite.prototype.addNewData = function(data) {
-    var firstLine = /^connecting at .+$/;
+    var firstLine = /^connect(ing|ed) at .+$/;
     if (firstLine.test(data)) return;
     this.chartPlotter.addNewData(data);
     this.checkBarChartAvailability();
+}
+
+Graphite.prototype.clearData = function(data) {
+	console.log("hi")
+    this.init();
 }
