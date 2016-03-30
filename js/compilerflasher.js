@@ -1188,7 +1188,7 @@ compilerflasher = function (loadFiles) {
                 this.disconnect();
                 return;
             }
-
+            selfCf.eventManager.fire('serial-monitor-connected');
             var $baudRates = $('#cb_cf_baud_rates');
             var speed = $baudRates.find('option:selected').val();
             var $ports = $("#cb_cf_ports");
@@ -1405,7 +1405,6 @@ compilerflasher = function (loadFiles) {
                 .off('click')
                 .click(function () {
                     selfPh.connect();
-                    selfCf.eventManager.fire('serial-monitor-connected');
                 });
 
             this.connected = false;

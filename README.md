@@ -35,3 +35,6 @@ http://graphite.codebender.cc/
    timestamp： 10303422 pressure:103 Voltage:22.0V Moisture: 21.1
    ....
 ```
+
+#Things To Do
+- Add event trigger in compilerflasher : "serial-monitor-received-data" and "serial-monitor-connected"

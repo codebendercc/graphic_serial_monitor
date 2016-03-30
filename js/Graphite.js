@@ -93,6 +93,5 @@ Graphite.prototype.addNewData = function(data) {
 }
 
 Graphite.prototype.clearData = function(data) {
-	console.log("hi")
     this.init();
 }
