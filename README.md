@@ -36,5 +36,42 @@ http://graphite.codebender.cc/
    ....
 ```
 
-#Things To Do
+# Developer's Guide
+
+- Javascript Dependencies:
+1.js/stringScanner.js
+2.js/dataparser.js
+3.js/graphplotter.js
+4.js/Graphite.js
+
+- DOM Element needed: Pls put the following DOM element in your HTML file
+
+Element Type | Description   | Default id |
+------------ | ------------- | -------------------|
+div | div for chart canvas | graphite_chart_container 
+button | button for CSV export | graphite_export_csv_button 
+button | button for pause/start | graphite_pause_button 
+bootstrap-switch | switch for bar/line chart | graphite_switch_button 
+table | data table | graphite_data_table
+
+- Constructor: Graphite(graphiteConfig)
+
+```
+   graphiteConfig(optional): customized id of DOM elements.Example:
+   {
+      canvas : "customized_canvas",
+      exportCSVButton: "customized_exportCSVButton",
+      switchButton: "customized_switchButton",
+      pauseButton: "customized_pauseButton",
+      dataTable: "customized_dataTable"
+   }
+```
+
+- Method: addNewData(rawData)
+add raw data string into graphite
+
+- Unit test: run SpecRunner.html
+
+
+# Things To Do
 - Add event trigger in compilerflasher : "serial-monitor-received-data" and "serial-monitor-connected"
