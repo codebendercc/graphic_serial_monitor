@@ -1188,7 +1188,7 @@ compilerflasher = function (loadFiles) {
                 this.disconnect();
                 return;
             }
-
+            selfCf.eventManager.fire('serial-monitor-connected');
             var $baudRates = $('#cb_cf_baud_rates');
             var speed = $baudRates.find('option:selected').val();
             var $ports = $("#cb_cf_ports");
@@ -1236,7 +1236,7 @@ compilerflasher = function (loadFiles) {
             function serialReadCallback (from, line) {
                 if (line.indexOf('connecting at') < 0) {
                     selfPh.serialMonitorStats.bytesReceived += line.length;
-                    $(document).trigger('serial_monitor_new_line', [line]);
+                    selfCf.eventManager.fire('serial-monitor-received-data', line);
                 }
                 selfPh.serialHudAppendString(line);
 
