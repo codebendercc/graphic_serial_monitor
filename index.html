@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
     <link rel='stylesheet' href="js/vendor/bootstrap-slider/bootstrap-slider.css">
     <link rel='stylesheet' href="js/vendor/bootstrap-switch/bootstrap-switch.min.css">
+    <link rel='stylesheet' href="js/vendor/bootstrap-slider/bootstrap-slider.css">
     <link rel="stylesheet" href="stylesheets/main.css">
 </head>
 <body>
@@ -63,6 +64,17 @@
             </div>
 
         </div>
+         <div class="row" style="margin-top:17px">
+            <div class="col-md-1 col-md-offset-3">
+                <label for="maxSamples">
+                    Samples:
+                </label>
+            </div>
+            
+            <div class="col-md-2">
+                    <input id="graphite_data_length_slider" type="number" name="history-back" data-slider-min="10" data-slider-max="10000" data-slider-step="1" data-slider-value="50">
+            </div>
+        </div>
         <br><br>
 
         <div class="row">
@@ -80,7 +92,7 @@
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
 	<script src="js/vendor/bootstrap-slider/bootstrap-slider.js"></script>
 	<script src="js/vendor/bootstrap-switch/bootstrap-switch.min.js"></script>
-
+    <script src="js/vendor/bootstrap-slider/bootstrap-slider.js"></script>
     <script src="js/vendor/canvasjs.min.js"></script>
     <script src="js/compilerflasher.js"></script>
     <script src="js/stringScanner.js"></script>

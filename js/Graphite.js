@@ -5,6 +5,7 @@ Graphite = function(graphiteConfig) {
     this.switchButton;
     this.pauseButton;
     this.dataTable;
+    this.dataLengthSlider;
     this.isPaused;
     this.variableNumber;
     if (typeof graphiteConfig == 'undefined') {
@@ -69,6 +70,21 @@ Graphite = function(graphiteConfig) {
         });
     }
 
+    this.initDataLengthSlider = function(dataLengthSlider) {
+        if (typeof dataLengthSlider == 'undefined') {
+            dataLengthSlider = "graphite_data_length_slider";
+        }
+        this.dataLengthSlider = $('#' + dataLengthSlider);
+        this.dataLengthSlider.slider("destroy");
+        this.dataLengthSlider.slider({
+            scale: 'logarithmic'
+        });
+        var self = this;
+        this.dataLengthSlider.on("slide", function(slideEvt) {
+            self.chartPlotter.setDataLength(slideEvt.value);
+        });
+    }
+
     this.initDataTable = function(dataTable) {
         if (typeof dataTable == 'undefined') {
             dataTable = "graphite_data_table";
@@ -84,7 +100,7 @@ Graphite = function(graphiteConfig) {
             this.variableNumber = this.chartPlotter.variableNumber
             this.initDataTable();
             for (var i = 1; i <= this.variableNumber; i++) {
-                var row = $('<tr><td>Data' + i + '</td><td class="mean' + i + '"></td><td class="SE' + i + '"></td><td class="max'+i+'"></td><td class="min'+i+'"></td></tr>');
+                var row = $('<tr><td>Data' + i + '</td><td class="mean' + i + '"></td><td class="SE' + i + '"></td><td class="max' + i + '"></td><td class="min' + i + '"></td></tr>');
                 this.dataTable.append(row);
             }
         }
@@ -110,6 +126,7 @@ Graphite = function(graphiteConfig) {
         this.initLineBarSwitch(this.graphiteConfig.switchButton);
         this.initPauseButton(this.graphiteConfig.pauseButton);
         this.initDataTable(this.graphiteConfig.dataTable);
+        this.initDataLengthSlider(this.graphiteConfig.dataLengthSlider);
         this.variableNumber = 0;
     }
 

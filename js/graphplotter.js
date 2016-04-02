@@ -135,7 +135,7 @@ GraphiteGraphPlotter = function(div) {
                     x: xCordValue,
                     y: datalist[i][j]
                 });
-                if (this.dataPoints[j].length > this.dataLength) {
+                while (this.dataPoints[j].length > this.dataLength) {
                     this.dataPoints[j].shift();
                 }
             }
@@ -229,6 +229,10 @@ GraphiteGraphPlotter.prototype.getMaxs = function() {
 
 GraphiteGraphPlotter.prototype.getMins = function() {
     return this.dataMins;
+}
+
+GraphiteGraphPlotter.prototype.setDataLength = function(newDataLength) {
+    this.dataLength = newDataLength;
 }
 
 function fillArray(content, amount) {

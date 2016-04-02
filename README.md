@@ -53,6 +53,7 @@ button | button for CSV export | graphite_export_csv_button
 button | button for pause/start | graphite_pause_button 
 bootstrap-switch | switch for bar/line chart | graphite_switch_button 
 table | data table | graphite_data_table
+bootstap-slider | slider for displayed sample size | graphite_data_length_slider
 
 - Constructor: Graphite(graphiteConfig)
 
