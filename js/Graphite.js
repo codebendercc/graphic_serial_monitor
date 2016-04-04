@@ -6,7 +6,10 @@ Graphite = function(graphiteConfig) {
     this.pauseButton;
     this.dataTable;
     this.dataLengthSlider;
+    this.unlimitedCheckbox;
     this.isPaused;
+    this.isUnlimitedMem = false;
+    this.sampleSizeMem = 50;
     this.variableNumber;
     if (typeof graphiteConfig == 'undefined') {
         this.graphiteConfig = {};
@@ -25,6 +28,7 @@ Graphite = function(graphiteConfig) {
         }
         var self = this;
         this.exportCSVButton = $('#' + exportCSVButton);
+        this.exportCSVButton.unbind();
         this.exportCSVButton.on('click', function() {
             self.chartPlotter.exportCSV();
         });
@@ -56,6 +60,7 @@ Graphite = function(graphiteConfig) {
         this.pauseButton.text('Pause');
         this.pauseButton.attr('class', 'btn btn-danger btn-block');
         var self = this;
+        this.pauseButton.unbind();
         this.pauseButton.on('click', function() {
             self.chartPlotter.togglePause();
             if (!self.isPaused) {
@@ -79,11 +84,28 @@ Graphite = function(graphiteConfig) {
         this.dataLengthSlider.slider({
             scale: 'logarithmic'
         });
+        this.dataLengthSlider.slider("setValue", this.sampleSizeMem);
         var self = this;
         this.dataLengthSlider.on("slide", function(slideEvt) {
+            self.sampleSizeMem = slideEvt.value;
             self.chartPlotter.setDataLength(slideEvt.value);
         });
     }
+
+    this.initUnlimitedCheckbox = function(unlimitedCheckbox) {
+        if (typeof unlimitedCheckbox == 'undefined') {
+            unlimitedCheckbox = "graphite_unlimited_checkbox";
+        }
+        this.unlimitedCheckbox = $('#' + unlimitedCheckbox);
+        this.unlimitedCheckbox.unbind();
+        this.unlimitedCheckbox.prop('checked', this.isUnlimitedMem);
+        updateSlider(this);
+        var self = this;
+        this.unlimitedCheckbox.click(function(){
+            updateSlider(self);
+        });
+    }
+
 
     this.initDataTable = function(dataTable) {
         if (typeof dataTable == 'undefined') {
@@ -105,8 +127,8 @@ Graphite = function(graphiteConfig) {
             }
         }
         for (var i = 0; i < this.variableNumber; i++) {
-            $(".mean" + (i + 1)).text("" + this.chartPlotter.getAverages()[i]);
-            $(".SE" + (i + 1)).text("" + this.chartPlotter.getStandardDevs()[i]);
+            $(".mean" + (i + 1)).text("" + this.chartPlotter.getAverages()[i].toFixed(5));
+            $(".SE" + (i + 1)).text("" + this.chartPlotter.getStandardDevs()[i].toFixed(5));
             $(".max" + (i + 1)).text("" + this.chartPlotter.getMaxs()[i]);
             $(".min" + (i + 1)).text("" + this.chartPlotter.getMins()[i]);
         }
@@ -127,14 +149,14 @@ Graphite = function(graphiteConfig) {
         this.initPauseButton(this.graphiteConfig.pauseButton);
         this.initDataTable(this.graphiteConfig.dataTable);
         this.initDataLengthSlider(this.graphiteConfig.dataLengthSlider);
+        this.initUnlimitedCheckbox(this.graphiteConfig.unlimitedCheckbox);
         this.variableNumber = 0;
     }
-
     this.init();
 }
 
 Graphite.prototype.addNewData = function(data) {
-    var firstLine = /^connect(ing|ed) at .+$/;
+    var firstLine = /connect(ing|ed) at .+/;
     if (firstLine.test(data)) return;
     this.updateDataTable();
     this.chartPlotter.addNewData(data);
@@ -143,4 +165,16 @@ Graphite.prototype.addNewData = function(data) {
 
 Graphite.prototype.clearData = function(data) {
     this.init();
+}
+
+function updateSlider(self) {
+    if (self.unlimitedCheckbox[0].checked) {
+        self.dataLengthSlider.slider("disable");
+        self.chartPlotter.setUnlimited(true);
+        self.isUnlimitedMem = true;
+        return;
+    }
+    self.dataLengthSlider.slider("enable");
+    self.chartPlotter.setUnlimited(false);
+    self.isUnlimitedMem = false;
 }

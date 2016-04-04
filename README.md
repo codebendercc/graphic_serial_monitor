@@ -58,6 +58,7 @@ button | button for pause/start | graphite_pause_button
 bootstrap-switch | switch for bar/line chart | graphite_switch_button 
 table | data table | graphite_data_table
 bootstap-slider | slider for displayed sample size | graphite_data_length_slider
+checkbox | whether user wants to limit sample size | graphite_unlimited_checkbox
 
 - Constructor: Graphite(graphiteConfig)
 

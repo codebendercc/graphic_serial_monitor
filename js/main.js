@@ -15,6 +15,6 @@ $(function() {
     });
 
     compilerflasher.on('serial-monitor-connected', function(data) {
-        graphite = new Graphite();
+        graphite.clearData();
     });
 });
