@@ -156,7 +156,7 @@ Graphite = function(graphiteConfig) {
 }
 
 Graphite.prototype.addNewData = function(data) {
-    var firstLine = /connect(ing|ed) at .+/;
+    var firstLine = /^connect(ing|ed) at .+/;
     if (firstLine.test(data)) return;
     this.updateDataTable();
     this.chartPlotter.addNewData(data);
