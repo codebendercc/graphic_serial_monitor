@@ -43,6 +43,10 @@ http://graphite.codebender.cc/
 2.js/dataparser.js
 3.js/graphplotter.js
 4.js/Graphite.js
+5.canvas.js
+
+or... you can just use the minified version
+js/Graphite.min.js, which contains stringScanner, dataparser, graphplotter and Graphite files.
 
 - DOM Element needed: Pls put the following DOM element in your HTML file
 
@@ -53,6 +57,8 @@ button | button for CSV export | graphite_export_csv_button
 button | button for pause/start | graphite_pause_button 
 bootstrap-switch | switch for bar/line chart | graphite_switch_button 
 table | data table | graphite_data_table
+bootstap-slider | slider for displayed sample size | graphite_data_length_slider
+checkbox | whether user wants to limit sample size | graphite_unlimited_checkbox
 
 - Constructor: Graphite(graphiteConfig)
 

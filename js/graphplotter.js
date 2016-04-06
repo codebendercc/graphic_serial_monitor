@@ -15,6 +15,7 @@ GraphiteGraphPlotter = function(div) {
     this.dataStandardDevs;
     this.dataMaxs;
     this.dataMins;
+    this.isUnlimited = false;
 
     /////////////////////
     //PROTECTED METHODS//
@@ -135,8 +136,10 @@ GraphiteGraphPlotter = function(div) {
                     x: xCordValue,
                     y: datalist[i][j]
                 });
-                if (this.dataPoints[j].length > this.dataLength) {
-                    this.dataPoints[j].shift();
+                if (!this.isUnlimited) {
+                    while (this.dataPoints[j].length > this.dataLength) {
+                        this.dataPoints[j].shift();
+                    }
                 }
             }
             this.xVal++;
@@ -230,6 +233,15 @@ GraphiteGraphPlotter.prototype.getMaxs = function() {
 GraphiteGraphPlotter.prototype.getMins = function() {
     return this.dataMins;
 }
+
+GraphiteGraphPlotter.prototype.setDataLength = function(newDataLength) {
+    this.dataLength = newDataLength;
+}
+
+GraphiteGraphPlotter.prototype.setUnlimited = function(isUnlimited) {
+    this.isUnlimited = isUnlimited;
+}
+
 
 function fillArray(content, amount) {
     tempArray = [];

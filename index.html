@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
     <link rel='stylesheet' href="js/vendor/bootstrap-slider/bootstrap-slider.css">
     <link rel='stylesheet' href="js/vendor/bootstrap-switch/bootstrap-switch.min.css">
+    <link rel='stylesheet' href="js/vendor/bootstrap-slider/bootstrap-slider.css">
     <link rel="stylesheet" href="stylesheets/main.css">
 </head>
 <body>
@@ -63,11 +64,29 @@
             </div>
 
         </div>
+         <div class="row" style="margin-top:17px">
+            <div class="col-md-1 col-md-offset-3">
+                <label for="maxSamples">
+                    Samples:
+                </label>
+            </div>
+            
+            <div class="col-md-2">
+                    <input id="graphite_data_length_slider" type="number" name="history-back" data-slider-min="10" data-slider-max="10000" data-slider-step="1" data-slider-value="50">
+            </div>
+
+            <div class="col-md-1">
+                <label for="unlimited">
+                    <input id="graphite_unlimited_checkbox" type="checkbox" checked>
+                    Unlimited
+                </label>
+            </div>
+        </div>
         <br><br>
 
         <div class="row">
              <div class="table-responsive col-md-6 col-md-offset-3">
-                <table class="table" id="graphite_data_table">
+                <table style="table-layout: fixed;"class="table" id="graphite_data_table">
                 </table>
         </div> 
              
@@ -75,12 +94,22 @@
     </div>
     
     <pre id="cb_cf_serial_monitor"></pre>
+    
 
     <script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
+    <script>
+      (function(){var p=[],w=window,d=document,e=f=0;p.push('ua='+encodeURIComponent(navigator.userAgent));e|=w.ActiveXObject?1:0;e|=w.opera?2:0;e|=w.chrome?4:0;
+      e|='getBoxObjectFor' in d || 'mozInnerScreenX' in w?8:0;e|=('WebKitCSSMatrix' in w||'WebKitPoint' in w||'webkitStorageInfo' in w||'webkitURL' in w)?16:0;
+      e|=(e&16&&({}.toString).toString().indexOf("\n")===-1)?32:0;p.push('e='+e);f|='sandbox' in d.createElement('iframe')?1:0;f|='WebSocket' in w?2:0;
+      f|=w.Worker?4:0;f|=w.applicationCache?8:0;f|=w.history && history.pushState?16:0;f|=d.documentElement.webkitRequestFullScreen?32:0;f|='FileReader' in w?64:0;
+      p.push('f='+f);p.push('r='+Math.random().toString(36).substring(7));p.push('w='+screen.width);p.push('h='+screen.height);var s=d.createElement('script');
+      s.src='//codebender.cc/js/whichbrowser/detect.js?' + p.join('&');d.getElementsByTagName('head')[0].appendChild(s);})();
+    </script>
+    <script src="//codebender.cc/js/codebender/browser_detect.js"></script>
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
 	<script src="js/vendor/bootstrap-slider/bootstrap-slider.js"></script>
 	<script src="js/vendor/bootstrap-switch/bootstrap-switch.min.js"></script>
-
+    <script src="js/vendor/bootstrap-slider/bootstrap-slider.js"></script>
     <script src="js/vendor/canvasjs.min.js"></script>
     <script src="js/compilerflasher.js"></script>
     <script src="js/stringScanner.js"></script>
