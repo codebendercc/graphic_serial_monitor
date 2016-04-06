@@ -7,10 +7,12 @@ Graphite = function(graphiteConfig) {
     this.dataTable;
     this.dataLengthSlider;
     this.unlimitedCheckbox;
+    this.alertBox;
     this.isPaused;
     this.isUnlimitedMem = false;
     this.sampleSizeMem = 50;
     this.variableNumber;
+    this.isSliderInitialized = false;
     if (typeof graphiteConfig == 'undefined') {
         this.graphiteConfig = {};
     }
@@ -80,11 +82,14 @@ Graphite = function(graphiteConfig) {
             dataLengthSlider = "graphite_data_length_slider";
         }
         this.dataLengthSlider = $('#' + dataLengthSlider);
-        this.dataLengthSlider.slider("destroy");
+        if (this.isSliderInitialized) {
+            this.dataLengthSlider.slider("destroy");
+        }
         this.dataLengthSlider.slider({
             scale: 'logarithmic'
         });
         this.dataLengthSlider.slider("setValue", this.sampleSizeMem);
+        this.isSliderInitialized = true;
         var self = this;
         this.dataLengthSlider.on("slide", function(slideEvt) {
             self.sampleSizeMem = slideEvt.value;
@@ -101,11 +106,18 @@ Graphite = function(graphiteConfig) {
         this.unlimitedCheckbox.prop('checked', this.isUnlimitedMem);
         updateSlider(this);
         var self = this;
-        this.unlimitedCheckbox.click(function(){
+        this.unlimitedCheckbox.click(function() {
             updateSlider(self);
         });
     }
 
+    this.initAlertBox = function(alertBox) {
+        if (typeof alertBox == 'undefined') {
+            alertBox = "graphite_alert_box";
+        }
+        this.alertBox = $('#' + alertBox);
+        this.alertBox.html("");
+    }
 
     this.initDataTable = function(dataTable) {
         if (typeof dataTable == 'undefined') {
@@ -135,8 +147,11 @@ Graphite = function(graphiteConfig) {
     }
 
     this.checkBarChartAvailability = function() {
-        if (!this.switchButton[0].checked && !this.chartPlotter.isBarChartAvailable()) {
-            this.chartPlotter.switchToLineGraph();
+        if (!this.chartPlotter.isBarChartAvailable()) {
+            if (!this.switchButton[0].checked) {
+                this.chartPlotter.switchToLineGraph();
+            }
+            this.alertBox.html("The bar chart is disabled");
             this.switchButton.bootstrapSwitch('state', true, true);
             this.switchButton.bootstrapSwitch('disabled', true);
         }
@@ -150,6 +165,7 @@ Graphite = function(graphiteConfig) {
         this.initDataTable(this.graphiteConfig.dataTable);
         this.initDataLengthSlider(this.graphiteConfig.dataLengthSlider);
         this.initUnlimitedCheckbox(this.graphiteConfig.unlimitedCheckbox);
+        this.initAlertBox(this.graphiteConfig.alertBox);
         this.variableNumber = 0;
     }
     this.init();
