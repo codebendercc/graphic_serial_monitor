@@ -3,6 +3,7 @@ GraphiteGraphPlotter = function(div) {
     this.div = div;
     this.chart;
     this.dataPoints;
+    this.barDataPoints;
     this.variableNumber;
     this.withXCoordinates;
     this.xVal = 0;
@@ -25,23 +26,28 @@ GraphiteGraphPlotter = function(div) {
      * @params {number} variableNumber - number of data per line
      * @params {boolean} withXCoordinates - whether the first number of the line is the x-coordinate
      */
-    this.initLineGraph = function(variableNumber, withXCoordinates) {
+    this.initLineGraph = function(variableNumber, withXCoordinates, reset) {
         this.xVal = 0;
         this.variableNumber = variableNumber || 1;
         this.withXCoordinates = withXCoordinates;
         if (typeof withXCoordinates == 'undefined') {
             this.withXCoordinates = false;
         }
+        if (typeof reset == 'undefined') {
+            reset = true;
+        }
         var dataStartPos = 0;
         if (withXCoordinates) {
             dataStartPos = 1;
         }
-        this.dataPoints = fillArray([], this.variableNumber);
-        this.dataAmounts = Array(this.variableNumber).fill(0);
-        this.dataAverages = Array(this.variableNumber).fill(0);
-        this.dataStandardDevs = Array(this.variableNumber).fill(0);
-        this.dataMaxs = Array(this.variableNumber).fill(-Infinity);
-        this.dataMins = Array(this.variableNumber).fill(Infinity);
+        if (reset) {
+            this.dataPoints = fillArray([], this.variableNumber);
+            this.dataAmounts = Array(this.variableNumber).fill(0);
+            this.dataAverages = Array(this.variableNumber).fill(0);
+            this.dataStandardDevs = Array(this.variableNumber).fill(0);
+            this.dataMaxs = Array(this.variableNumber).fill(-Infinity);
+            this.dataMins = Array(this.variableNumber).fill(Infinity);
+        }
         var tempData = [];
         for (var i = dataStartPos; i < this.variableNumber; i++) {
             tempData.push({
@@ -54,7 +60,6 @@ GraphiteGraphPlotter = function(div) {
         }
         this.chart = new CanvasJS.Chart(this.div, {
             zoomEnabled: true,
-            exportEnabled: true,
             legend: {
                 cursor: "pointer",
                 itemclick: function(e) {
@@ -71,14 +76,14 @@ GraphiteGraphPlotter = function(div) {
     }
 
     this.initBarGraph = function() {
-        this.dataPoints = [];
+        this.barDataPoints = [];
         if (this.dataparser.getFrequencies() == null) {
             this.switchToLineGraph();
             return;
         }
         var keys = Object.keys(this.dataparser.getFrequencies());
         for (var i = 0; i < keys.length; i++) {
-            this.dataPoints.push({
+            this.barDataPoints.push({
                 label: keys[i],
                 y: this.dataparser.getFrequencies()[keys[i]]
             })
@@ -87,7 +92,7 @@ GraphiteGraphPlotter = function(div) {
             data: [{
                 type: "column",
                 bevelEnabled: true,
-                dataPoints: this.dataPoints
+                dataPoints: this.barDataPoints
             }]
         });
         this.chart.render();
@@ -100,7 +105,7 @@ GraphiteGraphPlotter = function(div) {
         }
         var keys = Object.keys(this.dataparser.getFrequencies());
         for (var i = 0; i < keys.length; i++) {
-            this.dataPoints[i] = ({
+            this.barDataPoints[i] = ({
                 label: keys[i],
                 y: this.dataparser.getFrequencies()[keys[i]]
             })
@@ -181,7 +186,7 @@ GraphiteGraphPlotter.BAR_GRAPH = 1;
 
 GraphiteGraphPlotter.prototype.switchToLineGraph = function() {
     this.graphType = GraphiteGraphPlotter.LINE_GRAPH;
-    this.initLineGraph(this.dataparser.getvariableNumber(), this.dataparser.hasXCoordinates());
+    this.initLineGraph(this.dataparser.getvariableNumber(), this.dataparser.hasXCoordinates(), false);
 }
 
 GraphiteGraphPlotter.prototype.switchToBarGraph = function() {
@@ -212,10 +217,6 @@ GraphiteGraphPlotter.prototype.exportCSV = function() {
     });
     var encodedUri = encodeURI(csvContent);
     window.open(encodedUri);
-}
-
-GraphiteGraphPlotter.prototype.isBarChartAvailable = function() {
-    return this.dataparser.isRecordingFrequencies;
 }
 
 GraphiteGraphPlotter.prototype.getAverages = function() {

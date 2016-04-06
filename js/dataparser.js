@@ -21,8 +21,6 @@ GraphiteDataParser = function() {
     this.frequencies = {};
     //max number of values allowed in frequency recording
     this.frequencyMax = 10;
-    //indicates whether the program should continue recording the frequencies
-    this.isRecordingFrequencies = true;
 
     /////////////////////
     //PROTECTED METHODS//
@@ -99,15 +97,7 @@ GraphiteDataParser = function() {
      * @params {number} value - value to be processed
      */
     this.processFrequencies = function(value) {
-        if (!this.isRecordingFrequencies) {
-            return;
-        }
         if (this.frequencies[value] == undefined) {
-            //new value
-            if (Object.keys(this.frequencies).length == this.frequencyMax) {
-                this.isRecordingFrequencies = false;
-                return;
-            }
             this.frequencies[value] = 1;
             return;
         }
@@ -225,10 +215,7 @@ GraphiteDataParser.prototype.getvariableNumber = function() {
  * @return {hashn=map} {value:number of appearances}, if it has stopped recording, return null
  */
 GraphiteDataParser.prototype.getFrequencies = function() {
-    if (this.isRecordingFrequencies) {
-        return this.frequencies;
-    }
-    return null;
+    return this.frequencies;
 }
 /**
  * 'unnest' a nested array

@@ -80,3 +80,9 @@ html, body
     height: 50px;
     overflow-y: hidden;
 }
+
+.switch-icon
+{
+    height: 35px;
+    width: 35px;
+}
