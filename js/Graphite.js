@@ -7,7 +7,6 @@ Graphite = function(graphiteConfig) {
     this.dataTable;
     this.dataLengthSlider;
     this.unlimitedCheckbox;
-    this.alertBox;
     this.isPaused;
     this.isUnlimitedMem = false;
     this.sampleSizeMem = 50;
@@ -111,14 +110,6 @@ Graphite = function(graphiteConfig) {
         });
     }
 
-    this.initAlertBox = function(alertBox) {
-        if (typeof alertBox == 'undefined') {
-            alertBox = "graphite_alert_box";
-        }
-        this.alertBox = $('#' + alertBox);
-        this.alertBox.html("");
-    }
-
     this.initDataTable = function(dataTable) {
         if (typeof dataTable == 'undefined') {
             dataTable = "graphite_data_table";
@@ -154,7 +145,6 @@ Graphite = function(graphiteConfig) {
         this.initDataTable(this.graphiteConfig.dataTable);
         this.initDataLengthSlider(this.graphiteConfig.dataLengthSlider);
         this.initUnlimitedCheckbox(this.graphiteConfig.unlimitedCheckbox);
-        this.initAlertBox(this.graphiteConfig.alertBox);
         this.variableNumber = 0;
     }
     this.init();

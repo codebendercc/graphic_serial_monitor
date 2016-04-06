@@ -73,6 +73,7 @@ GraphiteGraphPlotter = function(div) {
             },
             data: tempData
         });
+        this.chart.render();
     }
 
     this.initBarGraph = function() {
@@ -95,7 +96,6 @@ GraphiteGraphPlotter = function(div) {
                 dataPoints: this.barDataPoints
             }]
         });
-        this.chart.render();
     }
 
     this.updateBarGraph = function() {
