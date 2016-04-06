@@ -146,17 +146,6 @@ Graphite = function(graphiteConfig) {
         }
     }
 
-    this.checkBarChartAvailability = function() {
-        if (!this.chartPlotter.isBarChartAvailable()) {
-            if (!this.switchButton[0].checked) {
-                this.chartPlotter.switchToLineGraph();
-            }
-            this.alertBox.html("The bar chart is disabled");
-            this.switchButton.bootstrapSwitch('state', true, true);
-            this.switchButton.bootstrapSwitch('disabled', true);
-        }
-    }
-
     this.init = function() {
         this.initGraphPlotter(this.graphiteConfig.canvas);
         this.initExportCSV(this.graphiteConfig.exportCSVButton);
@@ -176,7 +165,6 @@ Graphite.prototype.addNewData = function(data) {
     if (firstLine.test(data)) return;
     this.updateDataTable();
     this.chartPlotter.addNewData(data);
-    this.checkBarChartAvailability();
 }
 
 Graphite.prototype.clearData = function(data) {
