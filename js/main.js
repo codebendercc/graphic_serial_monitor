@@ -5,7 +5,9 @@ $(function() {
     // Initialize compilerflasher
     compilerflasher = new compilerflasher(function() {});
     // Initialize Graphite
-    var graphite = new Graphite();
+    var graphite = new Graphite({
+        alertBox: "cb_cf_operation_output"
+    });
     /**
      * Runs whenever new data is detected on serial monitor
      */

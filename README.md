@@ -44,6 +44,10 @@ http://graphite.codebender.cc/
 3.js/graphplotter.js
 4.js/Graphite.js
 5.canvas.js
+6.bootstrap-slider
+7.bootsrap-switch
+8.jquery
+9.bootstrap
 
 or... you can just use the minified version
 js/Graphite.min.js, which contains stringScanner, dataparser, graphplotter and Graphite files.
@@ -57,8 +61,9 @@ button | button for CSV export | graphite_export_csv_button
 button | button for pause/start | graphite_pause_button 
 bootstrap-switch | switch for bar/line chart | graphite_switch_button 
 table | data table | graphite_data_table
-bootstap-slider | slider for displayed sample size | graphite_data_length_slider
+bootstrap-slider | slider for displayed sample size | graphite_data_length_slider
 checkbox | whether user wants to limit sample size | graphite_unlimited_checkbox
+p | display messages | graphite_alert_box
 
 - Constructor: Graphite(graphiteConfig)
 
