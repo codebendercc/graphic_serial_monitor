@@ -27,7 +27,6 @@ GraphiteGraphPlotter = function(div) {
      * @params {boolean} withXCoordinates - whether the first number of the line is the x-coordinate
      */
     this.initLineGraph = function(variableNumber, withXCoordinates, reset) {
-        this.xVal = 0;
         this.variableNumber = variableNumber || 1;
         this.withXCoordinates = withXCoordinates;
         if (typeof withXCoordinates == 'undefined') {
@@ -41,6 +40,7 @@ GraphiteGraphPlotter = function(div) {
             dataStartPos = 1;
         }
         if (reset) {
+            this.xVal = 0;
             this.dataPoints = fillArray([], this.variableNumber);
             this.dataAmounts = Array(this.variableNumber).fill(0);
             this.dataAverages = Array(this.variableNumber).fill(0);
@@ -60,6 +60,7 @@ GraphiteGraphPlotter = function(div) {
         }
         this.chart = new CanvasJS.Chart(this.div, {
             zoomEnabled: true,
+            exportEnabled: true,
             legend: {
                 cursor: "pointer",
                 itemclick: function(e) {
@@ -96,6 +97,7 @@ GraphiteGraphPlotter = function(div) {
                 dataPoints: this.barDataPoints
             }]
         });
+        this.chart.render();
     }
 
     this.updateBarGraph = function() {

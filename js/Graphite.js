@@ -42,6 +42,7 @@ Graphite = function(graphiteConfig) {
         this.switchButton = $('#' + switchButton);
         this.switchButton.bootstrapSwitch();
         this.switchButton.bootstrapSwitch('disabled', false);
+        this.switchButton.bootstrapSwitch('state', true, true);
         var self = this;
         this.switchButton.on('switchChange.bootstrapSwitch', function(event, state) {
             if (state) {
