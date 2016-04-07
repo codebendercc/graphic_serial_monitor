@@ -47,9 +47,14 @@ Graphite = function(graphiteConfig) {
         this.switchButton.on('switchChange.bootstrapSwitch', function(event, state) {
             if (state) {
                 self.chartPlotter.switchToLineGraph();
+                self.dataLengthSlider.slider('enable');
+                self.unlimitedCheckbox.attr("disabled", false);
                 return;
             }
             self.chartPlotter.switchToBarGraph();
+            self.dataLengthSlider.slider('disable');
+            self.unlimitedCheckbox.attr("disabled", true);
+
         });
     }
 
@@ -60,6 +65,7 @@ Graphite = function(graphiteConfig) {
         this.isPaused = false;
         this.pauseButton = $('#' + pauseButton);
         this.pauseButton.text('Pause');
+        this.pauseButton.attr('disabled', false);
         this.pauseButton.attr('class', 'btn btn-danger btn-block');
         var self = this;
         this.pauseButton.unbind();
@@ -88,6 +94,7 @@ Graphite = function(graphiteConfig) {
         this.dataLengthSlider.slider({
             scale: 'logarithmic'
         });
+        this.dataLengthSlider.slider('enable');
         this.dataLengthSlider.slider("setValue", this.sampleSizeMem);
         this.isSliderInitialized = true;
         var self = this;
@@ -105,6 +112,7 @@ Graphite = function(graphiteConfig) {
         this.unlimitedCheckbox.unbind();
         this.unlimitedCheckbox.prop('checked', this.isUnlimitedMem);
         updateSlider(this);
+        this.unlimitedCheckbox.attr("disabled", false);
         var self = this;
         this.unlimitedCheckbox.click(function() {
             updateSlider(self);
@@ -149,6 +157,7 @@ Graphite = function(graphiteConfig) {
         this.variableNumber = 0;
     }
     this.init();
+    this.disablePauseButton();
 }
 
 Graphite.prototype.addNewData = function(data) {
@@ -158,8 +167,12 @@ Graphite.prototype.addNewData = function(data) {
     this.chartPlotter.addNewData(data);
 }
 
-Graphite.prototype.clearData = function(data) {
+Graphite.prototype.resetAll = function() {
     this.init();
+}
+
+Graphite.prototype.disablePauseButton = function() {
+    this.pauseButton.attr('disabled', true);
 }
 
 function updateSlider(self) {
@@ -173,3 +186,4 @@ function updateSlider(self) {
     self.chartPlotter.setUnlimited(false);
     self.isUnlimitedMem = false;
 }
+
