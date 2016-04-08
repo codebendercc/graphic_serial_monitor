@@ -15,6 +15,10 @@ $(function() {
     });
 
     compilerflasher.on('serial-monitor-connected', function(data) {
-        graphite.clearData();
+        graphite.resetAll();
+    });
+
+    compilerflasher.on('serial-monitor-disconnected', function(data) {
+        graphite.disablePauseButton();
     });
 });

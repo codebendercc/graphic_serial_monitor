@@ -85,4 +85,4 @@ add raw data string into graphite
 
 
 # Things To Do
-- Add event trigger in compilerflasher : "serial-monitor-received-data" and "serial-monitor-connected"
+- Add event trigger in compilerflasher : "serial-monitor-received-data", "serial-monitor-connected" and "serial-monitor-disconnected"

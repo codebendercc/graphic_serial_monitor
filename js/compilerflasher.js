@@ -1409,6 +1409,8 @@ compilerflasher = function (loadFiles) {
 
             this.connected = false;
 
+            selfCf.eventManager.fire('serial-monitor-disconnected');
+
             // UI updates
             $baudRates.removeAttr('disabled');
 
