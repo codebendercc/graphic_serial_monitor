@@ -47,8 +47,10 @@ Graphite = function(graphiteConfig) {
         this.switchButton.on('switchChange.bootstrapSwitch', function(event, state) {
             if (state) {
                 self.chartPlotter.switchToLineGraph();
-                self.dataLengthSlider.slider('enable');
                 self.unlimitedCheckbox.attr("disabled", false);
+                if (!self.unlimitedCheckbox[0].checked) {
+                    self.dataLengthSlider.slider('enable');
+                }
                 return;
             }
             self.chartPlotter.switchToBarGraph();
@@ -186,4 +188,3 @@ function updateSlider(self) {
     self.chartPlotter.setUnlimited(false);
     self.isUnlimitedMem = false;
 }
-
