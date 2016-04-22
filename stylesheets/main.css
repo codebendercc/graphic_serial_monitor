@@ -7,9 +7,9 @@ html, body
 
 #cb_cf_serial_monitor
 {
-    margin: 0 auto;
-    margin-top:20px;
-    width: 600px;
+    margin: 20px auto;
+    width: 80%;
+    max-width: 600px;
     height: 350px;
     overflow: hidden;
 }
@@ -32,7 +32,7 @@ html, body
 #history-back-label:hover,
 #keep-history-label:hover
 {
-    cursor: pointer;    
+    cursor: pointer;
 }
 
 #history-back
@@ -40,39 +40,26 @@ html, body
     width: 50px;
 }
 
+.serial-monitor-container {
+  display: inline-block;
+  width: 100%;
+  height: 100%;
+}
+
 #serial_monitor_content
 {
-    height: 100%;
-}
-
-#serial_monitor_content > .input-append
-{
-    margin-top: -50px;
-    height: 40px;
-}
-
-#text2send
-{
-    margin-top: -150px;
-    margin-left: -65px;
-}
-
-#serial_send
-{
-    margin-top: -50px;
-    margin-left: 120px;
-}
-
-#serial_monitor_hud_and_autoscroll
-{
-    height: calc(100% - 40px);
+    position: absolute;
+    top: -1000px;
+    left: -1000px;
 }
 
 #serial_hud
 {
-    overflow-y: scroll;
     height: 100%;
-    margin-top: -60px;
+    margin: 0;
+    position: relative;
+    top: -110px;
+    overflow-y: scroll;
 }
 
 #cb_cf_operation_output
