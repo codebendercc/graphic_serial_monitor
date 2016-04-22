@@ -1201,8 +1201,6 @@ compilerflasher = function (loadFiles) {
                 return;
             }
 
-            selfCf.eventManager.fire('serial-monitor-connected');
-
             var $baudRates = $('#cb_cf_baud_rates');
             var speed = $baudRates.find('option:selected').val();
             var $ports = $("#cb_cf_ports");
@@ -1231,6 +1229,7 @@ compilerflasher = function (loadFiles) {
             $("#serial_monitor_content").fadeIn(300);
 
             this.connected = true;
+            selfCf.eventManager.fire('serial-monitor-connected');
             // When in app no status messages appear when connection establishes
             this.serialMonitorInitialized = selfCf.useApp;
 
