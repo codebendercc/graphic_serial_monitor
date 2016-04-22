@@ -15,12 +15,17 @@ compilerflasher = function (loadFiles) {
 
     // codebender plugin and app minimum supported versions
     this.minVersion = {
-        CodebenderPlugin: '1.6.0.8',
-        CodebenderApp: '1.0.0.5'
+        pluginFirefox: '1.6.2.2',
+        pluginChrome: '1.6.0.8',
+        app: '1.0.0.8'
     };
-
+    this.chromeClient = '/embed/chrome-client.js';
+    this.minimumChromeVersion = 43; // Minimum version of Chrome/Chromium to use with programmers
+    this.chromeUpdateForProgrammersMessage = 'Due to a Chrome bug, to use programmers (or devices that internally use a programmer) you need to update your Chrome to version ' + this.minimumChromeVersion + ' or above.';
+    this.isChromeNotSuitableForProgrammers = false;
     this.pluginOrApp = 'plugin'; // String for codebender plugin or app use, used in Logs
     this.useApp = false; // Flag for codebender app use
+    this.useChrome = false; // Flag for Chrome use
 
     this.embedded = false;
 
@@ -31,56 +36,48 @@ compilerflasher = function (loadFiles) {
      */
     this.eventManager = new function () {
         this._listeners = {};
-
         this.addListener = function (type, listener) {
-            if (typeof this._listeners[type] == 'undefined') {
+            if (typeof this._listeners[type] === 'undefined') {
                 this._listeners[type] = [];
             }
-
             this._listeners[type].push(listener);
         };
-
-        this.fire = function (event, param1, param2) {
-            if (typeof event == 'string') {
-                event = {
-                    type: event
-                };
+        this.fire = function (event) {
+            if (typeof event === 'string') {
+                event = {type: event};
             }
             if (!event.target) {
                 event.target = this;
             }
             if (!event.type) {
-                throw new Error("Event object missing 'type' property.");
+                throw new Error('Event object missing "type" property.');
             }
             if (this._listeners[event.type] instanceof Array) {
+                var eventArguments = [];
+                var i;
+                var argumentsLength = arguments.length;
+                for (i = 1; i < argumentsLength; i++) {
+                    eventArguments.push(arguments[i]);
+                }
                 var listeners = this._listeners[event.type];
-                for (var i = 0, len = listeners.length; i < len; i++) {
-                    if (typeof param1 != 'undefined') {
-                        if (typeof param2 != 'undefined') {
-                            listeners[i].call(this, param1, param2);
-                        }
-                        else {
-                            listeners[i].call(this, param1);
-                        }
-                    }
-                    else {
-                        listeners[i].call(this);
-                    }
+                var listenersLength = listeners.length;
+                for (i = 0; i < listenersLength; i++) {
+                    listeners[i].apply(this, eventArguments);
                 }
             }
         };
-
         this.removeListener = function (type, listener) {
             if (this._listeners[type] instanceof Array) {
                 var listeners = this._listeners[type];
-                for (var i = 0, len = listeners.length; i < len; i++) {
+                var listenersLength = listeners.length;
+                for (var i = 0; i < listenersLength; i++) {
                     if (listeners[i] === listener) {
                         listeners.splice(i, 1);
                         break;
                     }
                 }
             }
-        };
+        }
     };
 
     /**
@@ -152,10 +149,9 @@ compilerflasher = function (loadFiles) {
          * @param board Board definition to use
          */
         this.doflashBootloader = function (programmer, board) {
-            // TODO: Remove when codebender app implements programmers
-            if (selfCf.useApp) {
-                selfCf.setOperationOutput('Programmers are not supported by the codebender app yet.');
-                selfCf.eventManager.fire('flash_failed', 'Programmers are not supported by the codebender app yet.');
+            if (selfCf.useApp && selfCf.isChromeNotSuitableForProgrammers) {
+                selfCf.setOperationOutput(selfCf.chromeUpdateForProgrammersMessage);
+                selfCf.eventManager.fire('flash_failed', selfCf.chromeUpdateForProgrammersMessage);
                 return;
             }
 
@@ -252,7 +248,7 @@ compilerflasher = function (loadFiles) {
 
             $ports.find('option[value=""]').remove();
 
-            function firstPortCallback () {
+            function firstPortCallback() {
                 var port = $ports.find('option:first').val();
                 $ports.val(port);
             }
@@ -338,7 +334,7 @@ compilerflasher = function (loadFiles) {
                 createLogCompilerflasher(actionId, metaData);
 
                 // Supported OS message
-                var supportedOsMessage = '<i class="icon-warning-sign"></i> To program your Arduino from your browser, please use <a href="http://www.google.com/chrome/" target="_blank">Google Chrome</a>/Chromium (version 41 and above on Linux) or <a href="http://www.mozilla.org/en-US/firefox/" target="_blank">Mozilla Firefox</a>.';
+                var supportedOsMessage = '<i class="icon-warning-sign"></i> To program your Arduino from your browser, please use <a href="http://www.google.com/chrome/" target="_blank">Google Chrome</a>/Chromium (version 41 and above on Linux) or <a href="http://www.mozilla.org/en-US/firefox/" target="_blank">Mozilla Firefox</a> (32bit only on Windows).';
                 // Unsupported OS message
                 var message = '<i class="icon-warning-sign"></i> To program your Arduino from your browser, please use <a href="http://www.google.com/chrome/" target="_blank">Google Chrome</a>/Chromium on Windows, Mac, Linux (version 41 and above) or Chrome OS (version 41 and above) or <a href="http://www.mozilla.org/en-US/firefox/" target="_blank">Mozilla Firefox</a> on Windows, Mac or Linux.';
 
@@ -523,7 +519,7 @@ compilerflasher = function (loadFiles) {
                     createLogCompilerflasher(actionId, metaData);
 
                     // Check installed codebender plugin/app version
-                    selfPh.validateVersion(selfCf.minVersion);
+                    selfPh.validateVersion();
 
                     // Register codebender plugin/app error callback
                     if (typeof selfPh.codebenderPlugin.setErrorCallback != 'undefined') {
@@ -613,21 +609,29 @@ compilerflasher = function (loadFiles) {
             var patch = firstVersion.patch - secondVersion.patch;
             var build = firstVersion.build - secondVersion.build;
 
-            if (major != 0) { return major; }
-            if (minor != 0) { return minor; }
-            if (patch != 0) { return patch; }
+            if (major != 0) {
+                return major;
+            }
+            if (minor != 0) {
+                return minor;
+            }
+            if (patch != 0) {
+                return patch;
+            }
 
             return build;
         };
 
         /**
          * Checks given version against minimum supported version
-         * @param version Version string to validate
          */
-        this.validateVersion = function (version) {
-            var minimumVersion = version.CodebenderPlugin;
+        this.validateVersion = function () {
+            var minimumVersion = selfCf.minVersion.pluginFirefox;
+            if (selfCf.useChrome) {
+                minimumVersion = selfCf.minVersion.pluginChrome;
+            }
             if (selfCf.useApp) {
-                minimumVersion = version.CodebenderApp;
+                minimumVersion = selfCf.minVersion.app;
             }
 
             var compareVersion = this.comparePluginVersions(this.parseVersionString(this.codebenderPlugin.version), this.parseVersionString(minimumVersion));
@@ -638,6 +642,7 @@ compilerflasher = function (loadFiles) {
                 alert = this.browserSpecificPluginInstall("You need to update the codebender");
                 selfCf.setOperationOutput(alert);
                 selfCf.eventManager.fire('plugin_notification', alert);
+                selfCf.eventManager.fire('update_plugin_or_app');
                 actionId = 27;
                 metaData = {
                     "success": true,
@@ -696,7 +701,7 @@ compilerflasher = function (loadFiles) {
             }
             window.oldSerialPortsAvail = serialPortsAvail;
 
-            function createPortsLog (ports, probeUsbPorts, parsedList) {
+            function createPortsLog(ports, probeUsbPorts, parsedList) {
                 var actionId = 36;
                 var metaData = {
                     "success": true,
@@ -719,7 +724,7 @@ compilerflasher = function (loadFiles) {
                 createLogCompilerflasher(actionId, metaData);
             }
 
-            function getPortsCallback (portsList) {
+            function getPortsCallback(portsList) {
                 window.serialPortsAvail = portsList;
                 if (oldSerialPortsAvail != serialPortsAvail) {
                     var parsedList = $.parseJSON(serialPortsAvail);
@@ -755,6 +760,7 @@ compilerflasher = function (loadFiles) {
                         metaData = {
                             "message": "Non catchable plugin crash.",
                             "tabID": selfPh.tabID,
+                            "type": selfCf.pluginOrApp,
                             "version": (window.plugin_version == 'undefined' || window.plugin_version === null) ? "undefined" : window.plugin_version,
                             "OS": {
                                 "name": (typeof Browsers.os.name == 'undefined') ? 'undefined' : Browsers.os.name,
@@ -940,7 +946,7 @@ compilerflasher = function (loadFiles) {
                 return alert;
             }
 
-            if (Browsers.isBrowser("Chrome") || Browsers.isBrowser("Chromium")) {
+            if (window.isChrome()) {
                 if (selfCf.useApp && alert.indexOf('You need to update the codebender') > -1) {
                     alert += ' app. <a href="http://feedback.codebender.cc/knowledgebase/articles/671065-how-to-update-codebender-app" target="_blank">Show me how</a>. (after the update please refresh the page)';
                 }
@@ -957,7 +963,7 @@ compilerflasher = function (loadFiles) {
                 return alert;
             }
 
-            if (Browsers.isBrowser("Firefox")) {
+            if (window.isSupportedFirefox()) {
                 selfCf.xpiHref = generatePath('pluginXpi', '/codebender.xpi');
                 alert += ' plugin. <a onclick=\'compilerflasher.pluginHandler.addTo("Firefox")\' id="xpi-download-url" href = "javascript:void(0);" >Add it to Firefox</a>.';
                 return alert;
@@ -990,7 +996,9 @@ compilerflasher = function (loadFiles) {
             };
             if (pluginUrl) {
                 createLogCompilerflasher(actionId, metaData, function () {
+                    window.skipUnloadCheck = true;
                     window.location.replace(pluginUrl);
+                    window.skipUnloadCheck = false;
                 });
             }
             else {
@@ -1024,7 +1032,7 @@ compilerflasher = function (loadFiles) {
          * Converts available ports object into a comma separated string
          * @param currentPorts Comma separated string of available ports
          */
-        function getPortsCallback (currentPorts) {
+        function getPortsCallback(currentPorts) {
             var ports = '';
 
             var jsonPorts = $.parseJSON(currentPorts);
@@ -1042,7 +1050,7 @@ compilerflasher = function (loadFiles) {
          * Callback function for getFire() port detection function
          * @param ports Comma separated string of available ports
          */
-        function getFireCallback (ports) {
+        function getFireCallback(ports) {
             if (selfPh.oldPorts === null) {
                 selfPh.logPorts();
                 selfPh.oldPorts = '';
@@ -1116,7 +1124,11 @@ compilerflasher = function (loadFiles) {
             // For app: Fail safe callback in case something went wrong
             //          Used for compatibility with the plugin
             window.hasPerm = this.codebenderPlugin.setCallback(function (from, output) {
-                if (output == "disconnect") {
+                if (typeof output === 'object' && output.isCrazyLog) {
+                    var actionId = 30000;
+                    createLogCompilerflasher(actionId, output);
+                }
+                else if (output == "disconnect") {
                     compilerflasher.pluginHandler.disconnect(true);
                 }
                 else {
@@ -1188,7 +1200,9 @@ compilerflasher = function (loadFiles) {
                 this.disconnect();
                 return;
             }
+
             selfCf.eventManager.fire('serial-monitor-connected');
+
             var $baudRates = $('#cb_cf_baud_rates');
             var speed = $baudRates.find('option:selected').val();
             var $ports = $("#cb_cf_ports");
@@ -1217,6 +1231,8 @@ compilerflasher = function (loadFiles) {
             $("#serial_monitor_content").fadeIn(300);
 
             this.connected = true;
+            // When in app no status messages appear when connection establishes
+            this.serialMonitorInitialized = selfCf.useApp;
 
             $serialMonitorConnect
                 .html('<i class="icon-unlink"></i> Disconnect')
@@ -1233,12 +1249,24 @@ compilerflasher = function (loadFiles) {
                 sendButtonPressed: 0
             };
 
-            function serialReadCallback (from, line) {
-                if (line.indexOf('connecting at') < 0) {
-                    selfPh.serialMonitorStats.bytesReceived += line.length;
-                    selfCf.eventManager.fire('serial-monitor-received-data', line);
+            function serialReadCallback(from, line) {
+                if (!selfPh.serialMonitorInitialized) {
+                    if (line.indexOf('connecting at') > -1) {
+                        $serialHud.html(line);
+                    }
+                    else if (line.indexOf('connected at') > -1) {
+                        $serialHud.html(line);
+                        selfPh.serialMonitorInitialized = true;
+                    }
+                    return;
                 }
+
+                if (selfPh.serialMonitorInitialized) {
+                    selfPh.serialMonitorStats.bytesReceived += line.length;
+                }
+
                 selfPh.serialHudAppendString(line);
+                selfCf.eventManager.fire('serial-monitor-received-data', line);
 
                 // codebender app
                 if (selfCf.useApp) {
@@ -1246,7 +1274,7 @@ compilerflasher = function (loadFiles) {
                 }
             }
 
-            function serialCloseCallback (from, line) {
+            function serialCloseCallback(from, line) {
                 var actionId = 69;
                 var metaData = {
                     "retVal": line,
@@ -1333,7 +1361,7 @@ compilerflasher = function (loadFiles) {
                 }
             }, 50);
 
-            function availablePortsCallback () {
+            function availablePortsCallback() {
                 clearInterval(portValidatorInterval);
                 selfPh.portValidatorIntervalRuns = false;
                 selfPh.disconnect(false);
@@ -1408,6 +1436,7 @@ compilerflasher = function (loadFiles) {
                 });
 
             this.connected = false;
+            this.serialMonitorInitialized = false;
 
             selfCf.eventManager.fire('serial-monitor-disconnected');
 
@@ -1486,9 +1515,15 @@ compilerflasher = function (loadFiles) {
                 this.serialHudWrite($serialHud.html() + line + "<br>");
             }
             else {
-                if (line == "13") {return;}
-                if (line == "10") {serialHudWrite($serialHud.html() + "<br>");}
-                if (line != "10") {serialHudWrite($serialHud.html() + String.fromCharCode(line));}
+                if (line == "13") {
+                    return;
+                }
+                if (line == "10") {
+                    serialHudWrite($serialHud.html() + "<br>");
+                }
+                if (line != "10") {
+                    serialHudWrite($serialHud.html() + String.fromCharCode(line));
+                }
             }
         };
 
@@ -1586,6 +1621,7 @@ compilerflasher = function (loadFiles) {
             if (typeof status == 'undefined' || status == 0) {
                 actionId = 34;
                 metaData = {
+                    "type": selfCf.pluginOrApp,
                     "message": msg,
                     "version": (window.plugin_version == 'undefined' || window.plugin_version === null) ? "undefined" : window.plugin_version,
                     "url": window.location.pathname,
@@ -1604,6 +1640,7 @@ compilerflasher = function (loadFiles) {
             else if (status == 1) {
                 actionId = 55;
                 metaData = {
+                    "type": selfCf.pluginOrApp,
                     "message": msg,
                     "version": (window.plugin_version == 'undefined' || window.plugin_version === null) ? "undefined" : window.plugin_version,
                     "url": window.location.pathname,
@@ -1895,7 +1932,7 @@ compilerflasher = function (loadFiles) {
         }
 
         if (format == 'autocomplete' && typeof editor != 'undefined' && typeof fileManager != 'undefined') {
-            payload['position'] = editor.getSession().getSelection().selectionLead.getPosition();
+            payload['position'] = editor.aceEditor.getSession().getSelection().selectionLead.getPosition();
             payload['position']['file'] = fileManager.openFname;
             payload['archive'] = true;
         }
@@ -1928,32 +1965,30 @@ compilerflasher = function (loadFiles) {
      * @param progress Return value of flash
      */
     this.flash_callback = function (from, progress) {
+        var actionId;
+        var metaData;
         if (progress) {
             var msg = compilerflasher.getFlashFailMessage(progress);
             compilerflasher.setOperationOutput(msg);
             compilerflasher.eventManager.fire('flash_failed', msg, progress);
 
             if (progress != 0 && (progress > -1 || progress < -23) && progress != -30 && progress != -55 && progress != -56 && progress != -57) {
-                var actionId = 51;
+                actionId = 51;
+                metaData = {
+                    "version": compilerflasher.pluginHandler.codebenderPlugin.version,
+                    "retVal": progress
+                };
                 // codebender app
                 if (selfCf.useApp) {
                     compilerflasher.pluginHandler.codebenderPlugin.getFlashResult(function (result) {
-                        var metaData = {
-                            "version": compilerflasher.pluginHandler.codebenderPlugin.version,
-                            "retVal": progress,
-                            "flashResult": result.substring(0, 1800)
-                        };
+                        metaData["flashResult"] = result.substring(0, 1800);
                         createLogCompilerflasher(actionId, metaData);
                     });
                 }
                 // codebender plugin
                 else {
                     var result = compilerflasher.pluginHandler.codebenderPlugin.getFlashResult();
-                    var metaData = {
-                        "version": compilerflasher.pluginHandler.codebenderPlugin.version,
-                        "retVal": progress,
-                        "flashResult": result.substring(0, 1800)
-                    };
+                    metaData["flashResult"] = result.substring(0, 1800);
                     createLogCompilerflasher(actionId, metaData);
                 }
             }
@@ -1967,14 +2002,17 @@ compilerflasher = function (loadFiles) {
             compilerflasher.setOperationOutput('Upload successful!');
         }
 
-        var url = generatePath('utitiesFlash', '/utilities/flash/');
-        if (url.indexOf('ERROR_CODE') > -1) {
-            url = url.replace('ERROR_CODE', progress + '&' + selfCf.pluginHandler.tabID + '&' + selfCf.pluginOrApp);
-        }
-        else {
-            url += progress + '&' + selfCf.pluginHandler.tabID + '&' + selfCf.pluginOrApp;
-        }
-        $.get(url);
+        actionId = 7;
+        metaData = {
+            "return_value": progress,
+            "tabID": selfCf.pluginHandler.tabID,
+            "type": selfCf.pluginOrApp,
+            "port": $('#cb_cf_ports').val(),
+            "board": selfCf.selectedBoard.name,
+            "programmer": selfCf.selectedProgrammer.name,
+            "usingProgrammer": selfCf.usingProgrammer
+        };
+        createLogCompilerflasher(actionId, metaData);
 
         window.operationInProgress = false;
     };
@@ -1984,6 +2022,10 @@ compilerflasher = function (loadFiles) {
      * Used by the download HEX option in editor
      */
     this.getHex = function () {
+        if (!this.selectedBoard) {
+            this.setOperationOutput('<i class="icon-remove"></i> Please select a board first.');
+            return;
+        }
         this.eventManager.fire('pre_hex');
         var payload = this.generate_payload('hex');
         var url = generatePath('utilitiesCompile', '/utilities/compile/');
@@ -2007,36 +2049,6 @@ compilerflasher = function (loadFiles) {
     };
 
     /**
-     * Blacklists boards that need a programmer when using the codebender app (until codebender app implements them)
-     * @method: blackListBoard
-     * @param {String} selectedBoard Current selected board name
-     * @return: bool
-     */
-    this.blackListBoard = function (selectedBoard) {
-        var blackList = false;
-
-        if (selfCf.useApp) {
-            var boardsNeedProgrammer = [
-                'Adafruit Pro Trinket 3V/12MHz (USB)',
-                'Adafruit Pro Trinket 5V/12MHz (USB)',
-                'Adafruit Gemma 8MHz',
-                'Adafruit Trinket 8MHz (3V)',
-                'Adafruit Trinket 8MHz',
-                'Adafruit Trinket 16MHz'
-            ];
-
-            for (var i = 0; i < boardsNeedProgrammer.length; i++) {
-                if (selectedBoard == boardsNeedProgrammer[i]) {
-                    blackList = true;
-                    break;
-                }
-            }
-        }
-
-        return blackList;
-    };
-
-    /**
      * Callback function for #cb_cf_flash_btn
      * Flashes a device by using a programmer
      * Uses getbin() function and doflash() method of plugin/app
@@ -2048,9 +2060,9 @@ compilerflasher = function (loadFiles) {
         window.operationInProgress = true;
 
         var actionId = 40;
-        var usingProgrammer = false;
+        this.usingProgrammer = false;
         if (typeof this.selectedBoard.upload.protocol == 'undefined') {
-            usingProgrammer = true;
+            this.usingProgrammer = true;
         }
         var metaData = {
             "port": $('#cb_cf_ports').val(),
@@ -2058,15 +2070,13 @@ compilerflasher = function (loadFiles) {
             "programmer": this.selectedProgrammer.name,
             "tabID": this.pluginHandler.tabID,
             "state": getEditorState(),
-            "usingProgrammer": usingProgrammer
+            "usingProgrammer": this.usingProgrammer
         };
         createLogCompilerflasher(actionId, metaData);
 
-        // TODO: Remove when codebender app implements programmers
-        if (selfCf.useApp && this.blackListBoard(this.selectedBoard.name)) {
-            this.setOperationOutput('The selected device needs a programmer, which is not supported by the codebender app yet.');
-            this.eventManager.fire('flash_failed', 'The selected device needs a programmer, which is not supported by the codebender app yet.');
-            window.operationInProgress = false;
+        if (selfCf.useApp && selfCf.isChromeNotSuitableForProgrammers) {
+            selfCf.setOperationOutput(selfCf.chromeUpdateForProgrammersMessage);
+            selfCf.eventManager.fire('flash_failed', selfCf.chromeUpdateForProgrammersMessage);
             return;
         }
 
@@ -2132,6 +2142,8 @@ compilerflasher = function (loadFiles) {
         }
         window.operationInProgress = true;
 
+        this.usingProgrammer = true; // Setting for flash_callback() Log (7)
+
         var actionId = 41;
         var metaData = {
             "port": $('#cb_cf_ports').val(),
@@ -2142,11 +2154,9 @@ compilerflasher = function (loadFiles) {
         };
         createLogCompilerflasher(actionId, metaData);
 
-        // TODO: Remove when codebender app implements programmers
-        if (selfCf.useApp) {
-            this.setOperationOutput('Programmers are not supported by the codebender app yet.');
-            this.eventManager.fire('flash_failed', 'Programmers are not supported by the codebender app yet.');
-            window.operationInProgress = false;
+        if (selfCf.useApp && selfCf.isChromeNotSuitableForProgrammers) {
+            selfCf.setOperationOutput(selfCf.chromeUpdateForProgrammersMessage);
+            selfCf.eventManager.fire('flash_failed', selfCf.chromeUpdateForProgrammersMessage);
             return;
         }
 
@@ -2211,6 +2221,9 @@ compilerflasher = function (loadFiles) {
         $.post(url, payload, function (data) {
             try {
                 var obj = jQuery.parseJSON(data);
+                if (!obj.success) {
+                    emptyCompilerOutputHandler(obj);
+                }
                 callback(obj);
             }
             catch (err) {
@@ -2275,10 +2288,11 @@ compilerflasher = function (loadFiles) {
 
         var actionId = 25;
         var metaData = {
-            "programmer": $('#programmer').find('option:selected').val(),
-            "board": $('#cb_cf_boards').find('option:selected').val(),
+            "programmer": $('#cb_cf_programmers').find('option:selected').val(),
+            "board": this.selectedBoard.name,
             "port": $('#cb_cf_ports').find('option:selected').val(),
-            "bootloader_file": ((typeof this.selectedBoard['bootloader']['file']) == 'undefined') ? 'undefined' : this.selectedBoard['bootloader']['file']
+            "bootloader_file": ((typeof this.selectedBoard['bootloader']['file']) == 'undefined') ? 'undefined' : this.selectedBoard['bootloader']['file'],
+            "type": this.pluginOrApp
         };
         createLogCompilerflasher(actionId, metaData);
 
@@ -2531,7 +2545,7 @@ compilerflasher = function (loadFiles) {
      * @param initializeCallback Callback function to execute after BabelFish loaded
      */
     function clientLoader (initializeCallback) {
-        var path = generatePath('chromeClient', '/embed/chrome-client.js');
+        var path = generatePath('chromeClient', selfCf.chromeClient);
         var script = document.createElement('script');
         script.async = true;
         document.body.appendChild(script);
@@ -2549,14 +2563,14 @@ compilerflasher = function (loadFiles) {
      * Checks if compilerflasher runs under a codebender.cc domain
      * @returns {boolean} Check status
      */
-    function isCodebenderDomain () {
+    function isCodebenderDomain() {
         return window.location.origin.indexOf('codebender.cc') > -1;
     }
 
     /**
      * Starts the initialization of compilerflasher
      */
-    function initializeCompilerflasher () {
+    function initializeCompilerflasher() {
         var message = 'Searching for plugin ...';
         if (selfCf.useApp) {
             message = 'Searching for app ...';
@@ -2588,16 +2602,22 @@ compilerflasher = function (loadFiles) {
     /**
      * Decides whether codebender plugin or app should be used
      */
-    function initPluginOrApp () {
+    function initPluginOrApp() {
         if (isCodebenderDomain()) {
             var useAppInterval = setInterval(function () {
-                if (typeof window.useChromeApp != 'undefined') {
+                if (typeof window.useChromeApp === 'function'
+                    && typeof window.isChrome === 'function'
+                    && typeof window.isChromeNotSuitableForProgrammers === 'function'
+                ) {
                     clearInterval(useAppInterval);
+
+                    selfCf.useChrome = window.isChrome();
 
                     // use codebender app
                     if (window.useChromeApp()) {
                         selfCf.pluginOrApp = 'app';
                         selfCf.useApp = true;
+                        selfCf.isChromeNotSuitableForProgrammers = window.isChromeNotSuitableForProgrammers();
                         clientLoader(initializeCompilerflasher);
                     }
                     // use codebender plugin
@@ -2619,7 +2639,7 @@ compilerflasher = function (loadFiles) {
      * Callback function executed after boards list fetched from the server
      * @param data Boards list Array fetched from the server
      */
-    function boardsListCallback (data) {
+    function boardsListCallback(data) {
         var plainList = getPlainBoardList(data);
         compilerflasher.setBoardsList(plainList);
 
@@ -2677,7 +2697,7 @@ compilerflasher = function (loadFiles) {
      * @param data {Object} All the boards grouped by vendor
      * @returns {Array} The boards list in an array form
      */
-    function getPlainBoardList (data) {
+    function getPlainBoardList(data) {
         var boards = [];
         $.each(data, function (vendorName, vendorBoards) {
                 $.each(vendorBoards, function (index, board) {
@@ -2694,7 +2714,7 @@ compilerflasher = function (loadFiles) {
      * Callback function executed after programmers list fetched from the server
      * @param data Programmers list Array fetched from the server
      */
-    function programmersListCallback (data) {
+    function programmersListCallback(data) {
         compilerflasher.programmers_list = data;
 
         var $programmers = $('#cb_cf_programmers');
@@ -2713,7 +2733,7 @@ compilerflasher = function (loadFiles) {
      * @param metaData Log metadata
      * @param callback Callback function to execute after Log creation
      */
-    function createLogCompilerflasher (actionId, metaData, callback) {
+    function createLogCompilerflasher(actionId, metaData, callback) {
         if (typeof createLog == 'function') {
             createLog(actionId, metaData, callback);
         }
@@ -2724,7 +2744,7 @@ compilerflasher = function (loadFiles) {
      * @param html HTML string to be decoder
      * @returns {string|XML} Decoded HTML string
      */
-    function decodeHtml (html) {
+    function decodeHtml(html) {
         return html.replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
     }
 
@@ -2733,7 +2753,7 @@ compilerflasher = function (loadFiles) {
      * @param html HTML string to be escaped
      * @returns {string|XML} Escaped HTML string
      */
-    function escapeHtml (html) {
+    function escapeHtml(html) {
         return html.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
 
@@ -2743,7 +2763,7 @@ compilerflasher = function (loadFiles) {
      * @param b Object to check against
      * @returns {boolean}
      */
-    function checkObjEquals (a, b) {
+    function checkObjEquals(a, b) {
         var aProps = Object.getOwnPropertyNames(a);
         var bProps = Object.getOwnPropertyNames(b);
         if (aProps.length != bProps.length) {
@@ -2762,7 +2782,7 @@ compilerflasher = function (loadFiles) {
      * Checks current editor's state against saved state
      * @returns {string} Checked editor's state [dirty, clean]
      */
-    function getEditorState () {
+    function getEditorState() {
         var state = 'unknown';
         if (typeof fileManager == 'undefined') {
             return state;
@@ -2786,7 +2806,7 @@ compilerflasher = function (loadFiles) {
      * A third log is created after a flash fail,
      * when the the sum of all open tabs data rates exceed rateThreshold
      */
-    function AppDataRateMeter () {
+    function AppDataRateMeter() {
         this.dataMonitor = {};
         this.dataMonitor.rateThreshold = 1000;
 
@@ -2990,7 +3010,7 @@ compilerflasher = function (loadFiles) {
     /**
      * Meters the raw data size in bytes, send by the Chrome app
      */
-    function AppRawDataMeter () {
+    function AppRawDataMeter() {
         this.lastLogTimestamp = 0;
         this.logPeriod = 10000;
 
@@ -3015,7 +3035,7 @@ compilerflasher = function (loadFiles) {
             var self = this;
             var currentKey = 'appRawDataMeter_' + compilerflasher.pluginHandler.tabID;
             this.exists(currentKey, function (exists) {
-                function saveState (messageBytesArray) {
+                function saveState(messageBytesArray) {
                     self.save({
                         key: currentKey,
                         messagesBytes: messageBytesArray,
@@ -3133,7 +3153,7 @@ compilerflasher = function (loadFiles) {
     /**
      * @returns {number} Time stamp since the epoch
      */
-    function getTstamp () {
+    function getTstamp() {
         return new Date().getTime();
     }
 
@@ -3145,17 +3165,17 @@ compilerflasher = function (loadFiles) {
      * @param staticPath Relative path used as fallback in case of window.codebender object is missing
      * @returns {String} The requested path
      */
-    function generatePath (codebenderPath, staticPath) {
-        if (!window.codebender) {
-            return generateUrl(staticPath);
+    function generatePath(codebenderPath, staticPath) {
+        if (window.codebender
+            && window.codebender.compilerflasher
+            && window.codebender.compilerflasher.hasOwnProperty(codebenderPath)
+        ) {
+            return window.codebender.compilerflasher[codebenderPath];
         }
 
-        if (!window.codebender.hasOwnProperty(codebenderPath)) {
-            return generateUrl(staticPath);
-        }
-
-        return window.codebender[codebenderPath];
+        return generateUrl(staticPath);
     }
+
     window.generatePath = generatePath;
 
     /**
@@ -3164,12 +3184,6 @@ compilerflasher = function (loadFiles) {
      * @returns {string} Generated URL
      */
     function generateUrl (url) {
-        var domain = window.location.hostname;
-        var codebenderRe = /^codebender\.cc$|^.+\.codebender\.cc$/;
-        if (codebenderRe.test(domain)) {
-            return url;
-        }
-
         return 'https://codebender.cc' + url;
     }
 
@@ -3178,18 +3192,17 @@ compilerflasher = function (loadFiles) {
      * Either from a variable in the global codebender object or from a static internal variable
      * @returns {*} Serial monitor section HTML
      */
-    function getSerialMonitorSection () {
-        var staticSerialMonitorSection = '\x3Cstyle\x3E\x0A\x09\x23serial_monitor_content\x0A\x09\x7B\x0A\x09\x09display\x3A\x20none\x3B\x0A\x09\x7D\x0A\x0A\x09\x23serial_hud\x0A\x09\x7B\x0A\x09\x09overflow\x2Dy\x3A\x20scroll\x3B\x0A\x09\x7D\x0A\x0A\x09\x23serial_monitor_hud_and_autoscroll\x0A\x09\x7B\x0A\x09\x09display\x3A\x20inline\x2Dblock\x3B\x0A\x09\x7D\x0A\x0A\x09\x23serial\x2Dchecboxes\x0A\x09\x7B\x0A\x09\x09display\x3A\x20inline\x2Dblock\x3B\x0A\x09\x7D\x0A\x0A\x09\x23serial\x2Dchecboxes\x20\x3E\x20label\x0A\x09\x7B\x0A\x09\x09margin\x2Dbottom\x3A\x200\x3B\x0A\x09\x7D\x0A\x0A\x09\x23autoscroll_label\x0A\x09\x7B\x0A\x09\x09position\x3A\x20relative\x3B\x0A\x09\x09top\x3A\x208px\x3B\x0A\x09\x7D\x0A\x0A\x09\x23autoscroll_check\x0A\x09\x7B\x0A\x09\x09display\x3A\x20block\x3B\x0A\x09\x7D\x0A\x0A\x09\x23echo_label\x0A\x09\x7B\x0A\x09\x09position\x3A\x20relative\x3B\x0A\x09\x09top\x3A\x203px\x3B\x0A\x09\x7D\x0A\x0A\x09.serial\x2Dmonitor\x2Decho\x0A\x09\x7B\x0A\x09\x09display\x3A\x20inline\x2Dblock\x3B\x0A\x09\x09color\x3A\x20\x23FF0000\x3B\x0A\x09\x7D\x0A\x0A\x09\x23serial\x2Dline\x2Dendings\x0A\x09\x7B\x0A\x09\x09width\x3A\x20130px\x3B\x0A\x09\x09margin\x2Dbottom\x3A\x2010px\x3B\x0A\x09\x7D\x0A\x3C\x2Fstyle\x3E\x0A\x0A\x3Cdiv\x20id\x3D\x22serial_monitor_content\x22\x3E\x0A\x09\x3Cdiv\x20id\x3D\x22serial_monitor_hud_and_autoscroll\x22\x3E\x0A\x09\x09\x3Cpre\x20id\x3D\x22serial_hud\x22\x20class\x3D\x22well\x22\x3E\x3C\x2Fpre\x3E\x0A\x0A\x09\x20\x20\x20\x20\x3Cspan\x20id\x3D\x22serial\x2Dchecboxes\x22\x3E\x0A\x09\x09\x20\x20\x20\x20\x3Clabel\x20id\x3D\x22autoscroll_label\x22\x20class\x3D\x22checkbox\x22\x3E\x0A\x09\x09\x09\x20\x20\x20\x20\x3Cinput\x20id\x3D\x27autoscroll_check\x27\x20type\x3D\x22checkbox\x22\x20checked\x3E\x0A\x09\x09\x09\x20\x20\x20\x20Autoscroll\x0A\x09\x09\x20\x20\x20\x20\x3C\x2Flabel\x3E\x0A\x0A\x09\x09\x20\x20\x20\x20\x3Clabel\x20id\x3D\x22echo_label\x22\x20class\x3D\x22checkbox\x22\x3E\x0A\x09\x09\x09\x20\x20\x20\x20\x3Cinput\x20id\x3D\x27echo_check\x27\x20type\x3D\x22checkbox\x22\x3E\x0A\x09\x09\x09\x20\x20\x20\x20Echo\x0A\x09\x09\x20\x20\x20\x20\x3C\x2Flabel\x3E\x0A\x09\x20\x20\x20\x20\x3C\x2Fspan\x3E\x0A\x0A\x09\x09\x3Cselect\x20id\x3D\x22serial\x2Dline\x2Dendings\x22\x3E\x0A\x09\x09\x09\x3Coption\x20value\x3D\x22nle\x22\x3ENo\x20line\x20ending\x3C\x2Foption\x3E\x0A\x09\x09\x09\x3Coption\x20value\x3D\x22nl\x22\x3ENewline\x3C\x2Foption\x3E\x0A\x09\x09\x09\x3Coption\x20value\x3D\x22cr\x22\x3ECarriage\x20return\x3C\x2Foption\x3E\x0A\x09\x09\x09\x3Coption\x20value\x3D\x22nlcr\x22\x20selected\x3D\x22selected\x22\x3EBoth\x20NL\x20\x26\x20CR\x3C\x2Foption\x3E\x0A\x09\x09\x3C\x2Fselect\x3E\x0A\x09\x3C\x2Fdiv\x3E\x0A\x0A\x09\x3Cdiv\x20class\x3D\x22input\x2Dappend\x22\x3E\x0A\x09\x09\x3Cinput\x20id\x3D\x22text2send\x22\x20type\x3D\x22text\x22\x20placeholder\x3D\x22Type\x20a\x20message\x22\x20onkeydown\x3D\x22compilerflasher.pluginHandler.serialSendOnEnter\x28event\x29\x22\x3E\x0A\x09\x09\x3Cbutton\x20id\x3D\x22serial_send\x22\x20onclick\x3D\x22compilerflasher.pluginHandler.serialSend\x28\x29\x22\x20class\x3D\x22btn\x22\x20title\x3D\x22Send\x20Message\x22\x3ESend\x3C\x2Fbutton\x3E\x0A\x09\x3C\x2Fdiv\x3E\x0A\x3C\x2Fdiv\x3E\x0A';
+    function getSerialMonitorSection() {
+        var staticSerialMonitorSection = '\x20\x20\x20\x20\x20\x20\x20\x20\x3Cstyle\x3E\x0A\x20\x20\x20\x20\x23serial_monitor_content\x20\x7B\x0A\x20\x20\x20\x20\x20\x20\x20\x20display\x3A\x20none\x3B\x0A\x20\x20\x20\x20\x7D\x0A\x0A\x20\x20\x20\x20\x23serial_hud\x20\x7B\x0A\x20\x20\x20\x20\x20\x20\x20\x20overflow\x2Dy\x3A\x20auto\x3B\x0A\x20\x20\x20\x20\x7D\x0A\x0A\x20\x20\x20\x20\x23serial_monitor_hud_and_autoscroll\x20\x7B\x0A\x20\x20\x20\x20\x20\x20\x20\x20display\x3A\x20inline\x2Dblock\x3B\x0A\x20\x20\x20\x20\x7D\x0A\x0A\x20\x20\x20\x20\x23serial\x2Dchecboxes\x20\x7B\x0A\x20\x20\x20\x20\x20\x20\x20\x20display\x3A\x20inline\x2Dblock\x3B\x0A\x20\x20\x20\x20\x7D\x0A\x0A\x20\x20\x20\x20\x23serial\x2Dchecboxes\x20\x3E\x20label\x20\x7B\x0A\x20\x20\x20\x20\x20\x20\x20\x20margin\x2Dbottom\x3A\x200\x3B\x0A\x20\x20\x20\x20\x7D\x0A\x0A\x20\x20\x20\x20\x23autoscroll_label\x20\x7B\x0A\x20\x20\x20\x20\x20\x20\x20\x20position\x3A\x20relative\x3B\x0A\x20\x20\x20\x20\x20\x20\x20\x20top\x3A\x208px\x3B\x0A\x20\x20\x20\x20\x7D\x0A\x0A\x20\x20\x20\x20\x23autoscroll_check\x20\x7B\x0A\x20\x20\x20\x20\x20\x20\x20\x20display\x3A\x20block\x3B\x0A\x20\x20\x20\x20\x7D\x0A\x0A\x20\x20\x20\x20\x23echo_label\x20\x7B\x0A\x20\x20\x20\x20\x20\x20\x20\x20position\x3A\x20relative\x3B\x0A\x20\x20\x20\x20\x20\x20\x20\x20top\x3A\x203px\x3B\x0A\x20\x20\x20\x20\x7D\x0A\x0A\x20\x20\x20\x20.serial\x2Dmonitor\x2Decho\x20\x7B\x0A\x20\x20\x20\x20\x20\x20\x20\x20display\x3A\x20inline\x2Dblock\x3B\x0A\x20\x20\x20\x20\x20\x20\x20\x20color\x3A\x20\x23FF0000\x3B\x0A\x20\x20\x20\x20\x7D\x0A\x0A\x20\x20\x20\x20\x23serial\x2Dline\x2Dendings\x20\x7B\x0A\x20\x20\x20\x20\x20\x20\x20\x20width\x3A\x20130px\x3B\x0A\x20\x20\x20\x20\x20\x20\x20\x20margin\x2Dbottom\x3A\x2010px\x3B\x0A\x20\x20\x20\x20\x7D\x0A\x3C\x2Fstyle\x3E\x0A\x0A\x3Cdiv\x20class\x3D\x22serial\x2Dmonitor\x2Dcontainer\x22\x3E\x0A\x20\x20\x20\x20\x3Cdiv\x20id\x3D\x22serial_monitor_content\x22\x3E\x0A\x20\x20\x20\x20\x20\x20\x20\x20\x3Cdiv\x20id\x3D\x22serial_monitor_hud_and_autoscroll\x22\x3E\x0A\x20\x20\x20\x20\x20\x20\x20\x20\x3Cspan\x20id\x3D\x22serial\x2Dchecboxes\x22\x3E\x0A\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x3Clabel\x20id\x3D\x22autoscroll_label\x22\x20class\x3D\x22checkbox\x22\x3E\x0A\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x3Cinput\x20id\x3D\x27autoscroll_check\x27\x20type\x3D\x22checkbox\x22\x20checked\x3E\x0A\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20Autoscroll\x0A\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x3C\x2Flabel\x3E\x0A\x0A\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x3Clabel\x20id\x3D\x22echo_label\x22\x20class\x3D\x22checkbox\x22\x3E\x0A\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x3Cinput\x20id\x3D\x27echo_check\x27\x20type\x3D\x22checkbox\x22\x3E\x0A\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20Echo\x0A\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x3C\x2Flabel\x3E\x0A\x20\x20\x20\x20\x20\x20\x20\x20\x3C\x2Fspan\x3E\x0A\x0A\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x3Cselect\x20id\x3D\x22serial\x2Dline\x2Dendings\x22\x3E\x0A\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x3Coption\x20value\x3D\x22nle\x22\x3ENo\x20line\x20ending\x3C\x2Foption\x3E\x0A\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x3Coption\x20value\x3D\x22nl\x22\x3ENewline\x3C\x2Foption\x3E\x0A\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x3Coption\x20value\x3D\x22cr\x22\x3ECarriage\x20return\x3C\x2Foption\x3E\x0A\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x3Coption\x20value\x3D\x22nlcr\x22\x20selected\x3D\x22selected\x22\x3EBoth\x20NL\x20\x26\x20CR\x3C\x2Foption\x3E\x0A\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x3C\x2Fselect\x3E\x0A\x20\x20\x20\x20\x20\x20\x20\x20\x3C\x2Fdiv\x3E\x0A\x0A\x20\x20\x20\x20\x20\x20\x20\x20\x3Cdiv\x20class\x3D\x22input\x2Dappend\x22\x3E\x0A\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x3Cinput\x20id\x3D\x22text2send\x22\x20type\x3D\x22text\x22\x20placeholder\x3D\x22Type\x20a\x20message\x22\x0A\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20onkeydown\x3D\x22compilerflasher.pluginHandler.serialSendOnEnter\x28event\x29\x22\x3E\x0A\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x3Cbutton\x20id\x3D\x22serial_send\x22\x20onclick\x3D\x22compilerflasher.pluginHandler.serialSend\x28\x29\x22\x20class\x3D\x22btn\x22\x20title\x3D\x22Send\x20Message\x22\x3E\x0A\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20Send\x0A\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x3C\x2Fbutton\x3E\x0A\x20\x20\x20\x20\x20\x20\x20\x20\x3C\x2Fdiv\x3E\x0A\x20\x20\x20\x20\x3C\x2Fdiv\x3E\x0A\x0A\x20\x20\x20\x20\x3Cpre\x20id\x3D\x22serial_hud\x22\x20class\x3D\x22well\x22\x3E\x3C\x2Fpre\x3E\x0A\x3C\x2Fdiv\x3E\x0A\x20\x20\x20\x20';
 
-        if (typeof window.codebender != 'object') {
-            return staticSerialMonitorSection;
+        if (window.codebender
+            && window.codebender.compilerflasher
+            && window.codebender.compilerflasher.hasOwnProperty('serialMonitorSection')
+        ) {
+            return window.codebender.compilerflasher.serialMonitorSection;
         }
 
-        if (!window.codebender.hasOwnProperty('serialMonitorSection')) {
-            return staticSerialMonitorSection;
-        }
-
-        return window.codebender.serialMonitorSection;
+        return staticSerialMonitorSection;
     }
 
     /**
@@ -3199,7 +3212,7 @@ compilerflasher = function (loadFiles) {
      * @param callback Callback function for Lawnchair
      * @param errorCallback Callback function when Lawnchair is unavailable or in case of error
      */
-    function lawnchairOperation (callback, errorCallback) {
+    function lawnchairOperation(callback, errorCallback) {
         if (typeof Lawnchair == 'undefined') {
             if (typeof errorCallback == 'function') {
                 errorCallback();
@@ -3214,6 +3227,17 @@ compilerflasher = function (loadFiles) {
             if (typeof errorCallback == 'function') {
                 errorCallback();
             }
+        }
+    }
+
+    function emptyCompilerOutputHandler(response) {
+        if (response.message.length == 0) {
+            var actionId = 20002;
+            var metaData = {
+                sketchID: window.projectID || '',
+                compilerResponse: response
+            };
+            createLogCompilerflasher(actionId, metaData);
         }
     }
 };
@@ -3234,7 +3258,7 @@ function logging() {
  */
 window.flashing_errors =
 {
-    "-1": "Couldnâ€™t find an Arduino on the selected port. If you are using Leonardo check that you have the correct port selected. If it is correct, try pressing the boardâ€™s reset button after initiating the upload.",
+    "-1": "Couldn’t find an Arduino on the selected port. If you are using Leonardo check that you have the correct port selected. If it is correct, try pressing the board’s reset button after initiating the upload.",
     "-2": "There was a problem programming your Arduino. If you are using a non-English Windows version, or username please contact us.",
     "-22": "The selected port seems to be in use. Please check your board connection, and make sure that you are not using it from some other application or you don't have an open serial monitor.",
     "-23": "Another flashing process is still active. Please wait until it is done and try again.",
@@ -3268,4 +3292,3 @@ window.flashing_errors =
     33005: "This baudrate is not supported by the operating system.",
     36000: "Could not connect to your device. Make sure that you have connected it properly, that you have selected the correct settings (device type and port) and try again."
 };
-
