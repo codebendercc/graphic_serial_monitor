@@ -88,6 +88,7 @@ html, body
 #cb_cf_operation_output
 {
     height: 50px;
+    margin-top: 15px;
     overflow-y: hidden;
 }
 
