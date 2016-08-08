@@ -6,16 +6,13 @@
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
     <link rel='stylesheet' href="js/vendor/bootstrap-slider/bootstrap-slider.css">
     <link rel='stylesheet' href="js/vendor/bootstrap-switch/bootstrap-switch.min.css">
-    <link rel='stylesheet' href="js/vendor/bootstrap-slider/bootstrap-slider.css">
     <link rel="stylesheet" href="stylesheets/main.css">
 </head>
 <body>
-
-
     <div class="container-fluid">
         <div class="row">
             <div class="col-md-6 col-md-offset-3">
-                <h1 style="text-align: center; margin-bottom: 20px;">Serial Monitor Graph</h1>
+                <h1 class="graphite-header">Serial Monitor Graph</h1>
                 <hr>
             </div>
         </div>
@@ -30,15 +27,14 @@
             <div class="col-md-6 col-md-offset-3">
                 <div class="row">
                     <div class="col-md-4">
-                        <select id="cb_cf_ports" class="form-control">
-                        </select>
+                        <select id="cb_cf_ports" class="form-control"></select>
                     </div>
                     <div class="col-md-4">
                         <select id="cb_cf_baud_rates" class="form-control"></select>
                     </div>
                     <div class="col-md-4">
                         <button id="cb_cf_serial_monitor_connect" class="btn btn-default" type="submit">
-                            Open Serial Monitor
+                            Connect
                         </button>
                     </div>
                 </div>
@@ -48,51 +44,56 @@
 
         <div class="row">
             <div class="col-md-6 col-md-offset-3">
-                <div id="graphite_chart_container" style="height: 300px; width:100%;">
+                <div id="graphite_chart_container"></div>
             </div>
         </div>
 
-        <div class="row" style="margin-top:17px">
-            <div class="col-md-2 col-md-offset-3">
+        <div class="row graphite-controls">
+          <div class="col-md-6 col-md-offset-3">
+            <div class="col-md-4">
                 <button id="graphite_export_csv_button" class="btn btn-default btn-block" >export csv</button>
             </div>
-            <div class="col-md-2">
+            <div class="col-md-4">
                 <button id="graphite_pause_button" class="btn btn-danger btn-block">Pause</button>
             </div>
-            <div class="col-md-2">
+            <div class="col-md-4">
                 <img class = "switch-icon"src="img/line.png">
-            	<input type="checkbox" name="chart-checkbox" id="graphite_switch_button" data-off-color="primary" data-on-text="LINE" data-off-text="BAR" checked>
+                <input id="graphite_switch_button" type="checkbox" name="chart-checkbox" data-off-color="primary" data-on-text="LINE" data-off-text="BAR" checked>
                 <img class = "switch-icon"src="img/bar.png">
             </div>
-
+          </div>
         </div>
-         <div class="row" style="margin-top:17px">
-            <div class="col-md-2 col-md-offset-3">
-                <label for="maxSamples">
-                    Line Chart Sample Size:
-                </label>
-            </div>
 
-            <div class="col-md-2">
+        <div class="row graphite-controls">
+            <div class="col-md-6 col-md-offset-3">
+                <div class="col-md-4">
+                    <label for="maxSamples">
+                        Line Chart Sample Size:
+                    </label>
+                </div>
+
+                <div class="col-md-4">
                     <input id="graphite_data_length_slider" type="number" name="history-back" data-slider-min="10" data-slider-max="10000" data-slider-step="1" data-slider-value="50">
-            </div>
+                </div>
 
-            <div class="col-md-1">
-                <label for="unlimited">
-                    <input id="graphite_unlimited_checkbox" type="checkbox" checked>
-                    Unlimited
-                </label>
+                <div class="col-md-4">
+                    <label for="unlimited">
+                        <input id="graphite_unlimited_checkbox" type="checkbox" checked>
+                        Unlimited
+                    </label>
+                </div>
             </div>
         </div>
+
         <br><br>
 
-        <div class="row">
-             <div class="table-responsive col-md-6 col-md-offset-3">
-                <table style="table-layout: fixed;"class="table" id="graphite_data_table">
-                </table>
+        <div class="row graphite-controls">
+            <div class="col-md-6 col-md-offset-3">
+                <div class="table-responsive col-md-12">
+                    <table id="graphite_data_table" class="table"></table>
+                </div>
+            </div>
         </div>
-
-
     </div>
 
     <pre id="cb_cf_serial_monitor"></pre>
@@ -111,7 +112,6 @@
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
     <script src="js/vendor/bootstrap-slider/bootstrap-slider.js"></script>
     <script src="js/vendor/bootstrap-switch/bootstrap-switch.min.js"></script>
-    <script src="js/vendor/bootstrap-slider/bootstrap-slider.js"></script>
     <script src="js/vendor/canvasjs.min.js"></script>
     <script src="js/compilerflasher.js"></script>
     <script src="js/stringScanner.js"></script>
@@ -119,6 +119,5 @@
     <script src="js/graphplotter.js"></script>
     <script src="js/Graphite.js"></script>
     <script src="js/main.js"></script>
-
 </body>
 </html>
